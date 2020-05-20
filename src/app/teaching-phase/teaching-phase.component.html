@@ -1,0 +1,101 @@
+<div *ngIf="'start' == getState()" class="ui container">
+  <h1>Memo Game</h1>
+  <p>Memorize the order of the displayed icons and their background colors.</p>
+
+  <div class="ui grid">
+    <div class="column">
+      <button (click)="startTraining()" class="ui button">
+        Begin
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="'teach' == getState()" class="ui container">
+  <h1>Teaching Phase</h1>
+  <div class="ui grid">
+    <div class="column">
+      <button class="ui massive icon button" [ngClass]="colorClass">
+        <i class="icon" [ngClass]="iconClass"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="'testIcons' == getState() || 'testColors' == getState()"
+  class="ui container"
+>
+  <h1>Testing Phase</h1>
+  <div class="three wide column" style="padding-bottom: 1em;">
+    <p>Click in the order of appearence.</p>
+  </div>
+  <div *ngIf="'testIcons' == getState()" class="ui grid">
+    <div
+      *ngFor="let iconName of iconNames; let idx = index"
+      class="three wide column"
+    >
+      <button (click)="guessIcon(idx)" class="ui massive white icon button">
+        <i class="black {{ iconName }} icon "></i>
+      </button>
+    </div>
+  </div>
+  <div *ngIf="'testColors' == getState()" class="ui grid">
+    <div
+      *ngFor="let color of colorNames; let idx = index"
+      class="three wide column"
+    >
+      <button
+        (click)="guessColor(idx)"
+        class="ui massive icon button {{ color }}"
+      ></button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="'correct' == getState()" class="ui container">
+  <h1>Congratulations!</h1>
+  <div class="ui grid">
+    <div class="column">
+      <button class="ui massive green icon button">
+        <i class="thumbs up icon"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="'false' == getState()" class="ui container">
+  <h1>Sorry</h1>
+  <div class="ui grid">
+    <div class="column">
+      <button class="ui massive red icon button">
+        <i class="frown icon"></i>
+      </button>
+    </div>
+  </div>
+</div>
+<div
+  *ngIf="'correct' == getState() || 'false' == getState()"
+  class="ui container"
+>
+  <h2 style="padding-top: 1em;">The solution was</h2>
+  <div class="ui grid">
+    <div
+      *ngFor="let icon of usedIcons.split(''); let idx = index"
+      class="three wide column"
+    >
+      <div class="three wide column">
+        <button class="ui {{ getTrainedColorName(idx) }} icon button">
+          <i class="{{ getTrainedIconName(idx) }} icon"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="ui grid">
+    <div class="column">
+      <button (click)="restart()" class="ui white button">
+        Restart
+      </button>
+    </div>
+  </div>
+</div>
