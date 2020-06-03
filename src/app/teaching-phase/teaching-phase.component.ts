@@ -1,63 +1,63 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: "app-teaching-phase",
-  templateUrl: "./teaching-phase.component.html",
-  styleUrls: ["./teaching-phase.component.css"]
+  selector: 'app-teaching-phase',
+  templateUrl: './teaching-phase.component.html',
+  styleUrls: ['./teaching-phase.component.css']
 })
 export class TeachingPhaseComponent implements OnInit {
   iconNames: string[];
   colorNames: string[];
   states: string[];
   state: number;
-  numbers: String = "0123456789";
-  colors: String = "0123456789";
-  usedIcons: String = "";
-  usedColors: String = "";
-  guessedIcons: string = "";
-  guessedColors: string = "";
+  numbers = '0123456789';
+  colors = '0123456789';
+  usedIcons = '';
+  usedColors = '';
+  guessedIcons = '';
+  guessedColors = '';
   displayIconIndex: number;
   displayColorIndex: number;
   rounds: number;
-  roundsCount: number = 0;
-  numRoundsReached: boolean;
-  displayInterval: number = 3000; // millies;
+  roundsCount = 0;
+  displayInterval = 3000; // millies;
   iconClass: string[];
   colorClass: string[];
   interval: any;
 
-  constructor() {
+  constructor(private router: Router) {
     this.iconNames = [
-      "truck",
-      "beer",
-      "bed",
-      "bell",
-      "briefcase",
-      "bicycle",
-      "binoculars",
-      "bomb",
-      "coffee",
-      "fighter jet"
+      'truck',
+      'beer',
+      'bed',
+      'bell',
+      'briefcase',
+      'bicycle',
+      'binoculars',
+      'bomb',
+      'coffee',
+      'fighter jet'
     ];
     this.colorNames = [
-      "red",
-      "yellow",
-      "green",
-      "blue",
-      "purple",
-      "brown",
-      "grey",
-      "black",
-      "pink",
-      "teal"
+      'red',
+      'yellow',
+      'green',
+      'blue',
+      'purple',
+      'brown',
+      'grey',
+      'black',
+      'pink',
+      'teal'
     ];
     this.states = [
-      "start",
-      "teach",
-      "testIcons",
-      "testColors",
-      "correct",
-      "false"
+      'start',
+      'teach',
+      'testIcons',
+      'testColors',
+      'correct',
+      'false'
     ];
     this.displayIconIndex = Math.floor(Math.random() * 10);
     this.displayColorIndex = Math.floor(Math.random() * 10);
@@ -65,7 +65,9 @@ export class TeachingPhaseComponent implements OnInit {
     this.rounds = 3;
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.startTraining();
+  }
 
   startTraining() {
     this.teachNext();
@@ -78,12 +80,13 @@ export class TeachingPhaseComponent implements OnInit {
   restart() {
     this.state = 0;
     this.roundsCount = 0;
-    this.numbers = "0123456789";
-    this.colors = "0123456789";
-    this.usedIcons = "";
-    this.usedColors = "";
-    this.guessedIcons = "";
-    this.guessedColors = "";
+    this.numbers = '0123456789';
+    this.colors = '0123456789';
+    this.usedIcons = '';
+    this.usedColors = '';
+    this.guessedIcons = '';
+    this.guessedColors = '';
+    this.router.navigate(['home']);
   }
 
   teachNext() {
@@ -100,25 +103,24 @@ export class TeachingPhaseComponent implements OnInit {
   }
 
   getUnusedRandomIconIndex(): number {
-    let newIndex: number = this.getUnusedRandomIndex(this.numbers);
-    this.numbers = this.numbers.replace(newIndex.toString(), "");
+    const newIndex: number = this.getUnusedRandomIndex(this.numbers);
+    this.numbers = this.numbers.replace(newIndex.toString(), '');
     this.usedIcons = this.usedIcons.concat(newIndex.toString());
     return newIndex;
   }
 
   getUnusedRandomColorIndex(): number {
-    let newIndex: number = this.getUnusedRandomIndex(this.colors);
-    this.colors = this.colors.replace(newIndex.toString(), "");
+    const newIndex: number = this.getUnusedRandomIndex(this.colors);
+    this.colors = this.colors.replace(newIndex.toString(), '');
     this.usedColors = this.usedColors.concat(newIndex.toString());
     return newIndex;
   }
 
-  getUnusedRandomIndex(unusedIndices: String): number {
-    let maxIndex: number = unusedIndices.length;
-    let index: number = Math.floor(Math.random() * maxIndex);
-    let digit: string = unusedIndices.charAt(index);
-    let randomIndex: number = Number.parseInt(digit);
-    return randomIndex;
+  getUnusedRandomIndex(unusedIndices: string): number {
+    const maxIndex: number = unusedIndices.length;
+    const index: number = Math.floor(Math.random() * maxIndex);
+    const digit: string = unusedIndices.charAt(index);
+    return Number(digit);
   }
 
   getState(): string {
@@ -127,17 +129,17 @@ export class TeachingPhaseComponent implements OnInit {
 
   guessIcon(index: number) {
     this.guessedIcons += index;
-    if (this.guessedIcons.length == this.rounds) {
+    if (this.guessedIcons.length === this.rounds) {
       this.state++;
     }
   }
 
   guessColor(index: number) {
     this.guessedColors += index;
-    if (this.guessedColors.length == this.rounds) {
+    if (this.guessedColors.length === this.rounds) {
       if (
-        this.guessedIcons == this.usedIcons &&
-        this.guessedColors == this.usedColors
+        this.guessedIcons === this.usedIcons &&
+        this.guessedColors === this.usedColors
       ) {
         this.state++;
         return;
