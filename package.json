@@ -21,6 +21,7 @@
     "@angular/router": "~9.1.7",
     "@ngrx/core": "^1.2.0",
     "@ngrx/store": "^9.2.0",
+    "@ngrx/store-devtools": "^9.2.0",
     "ngrx": "0.0.1-security",
     "rxjs": "^6.5.5",
     "tslib": "^1.13.0",

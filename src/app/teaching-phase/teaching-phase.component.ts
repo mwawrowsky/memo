@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { hit, miss } from '../store/result.actions';
 
 @Component({
   selector: 'app-teaching-phase',
@@ -26,7 +28,7 @@ export class TeachingPhaseComponent implements OnInit {
   colorClass: string[];
   interval: any;
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private store: Store) {
     this.iconNames = [
       'truck',
       'beer',
@@ -142,8 +144,10 @@ export class TeachingPhaseComponent implements OnInit {
         this.guessedColors === this.usedColors
       ) {
         this.state++;
+        this.store.dispatch(hit());
         return;
       }
+      this.store.dispatch(miss());
       this.state += 2;
     }
   }
