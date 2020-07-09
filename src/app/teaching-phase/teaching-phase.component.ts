@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Store, select } from '@ngrx/store';
+import { Result } from '../store/result.reducer';
 import { hit, miss } from '../store/result.actions';
+import { Observable, Observer } from 'rxjs';
 
 @Component({
   selector: 'app-teaching-phase',
@@ -23,12 +25,26 @@ export class TeachingPhaseComponent implements OnInit {
   displayColorIndex: number;
   rounds: number;
   roundsCount = 0;
-  displayInterval = 3000; // millies;
+  displayInterval = 300; // millies;
   iconClass: string[];
   colorClass: string[];
   interval: any;
+  hitCount$: Observable<number>;
+  missCount$: Observable<number>;
+  hitCount: number;
+  time = new Observable<string>((observer: Observer<string>) => {
+    setInterval(() => observer.next(new Date().toString()), 1000);
+  });
 
-  constructor(private router: Router, private store: Store) {
+
+  constructor(private router: Router, private store: Store<Result>) {
+    this.hitCount$ = this.store.select<number>(store => store.hitCount);
+    this.missCount$ = this.store.select('missCount');
+    this.store.select(store => store).subscribe(store => console.log('store is: ' + store));
+    this.store.select(store => store).subscribe(store => console.log('missCount is: ' + store.missCount));
+    setInterval(() => this.store.dispatch(miss()), 1000);
+
+
     this.iconNames = [
       'truck',
       'beer',
@@ -69,6 +85,7 @@ export class TeachingPhaseComponent implements OnInit {
 
   ngOnInit(): void {
     this.startTraining();
+    console.log('component initialzed')
   }
 
   startTraining() {
@@ -145,6 +162,7 @@ export class TeachingPhaseComponent implements OnInit {
       ) {
         this.state++;
         this.store.dispatch(hit());
+        console.log('hitCount: ' + this.store.select(state => state.hitCount));
         return;
       }
       this.store.dispatch(miss());

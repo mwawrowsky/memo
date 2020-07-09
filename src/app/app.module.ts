@@ -7,7 +7,7 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { AppComponent } from './app.component';
 import { TeachingPhaseComponent } from './teaching-phase/teaching-phase.component';
 import { HomeComponent } from './home/home.component';
-import { resultReducer } from './store/result.reducer'
+import { reducer } from './store/result.reducer'
 
 const routes: Routes = [
   // basic routes
@@ -38,7 +38,7 @@ const routes: Routes = [
   imports: [
     BrowserModule,
     RouterModule.forRoot(routes),
-    StoreModule.forRoot({ result: resultReducer }),
+    StoreModule.forRoot({ reducer: reducer }),
     StoreDevtoolsModule.instrument({ maxAge: 10 })
   ],
   providers: [],
