@@ -111,6 +111,9 @@
           }
         }
       }
-    }},
-  "defaultProject": "memo"
+    }
+  },
+  "cli": {
+    "analytics": false
+  }
 }
