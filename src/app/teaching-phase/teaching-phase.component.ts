@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Store, select } from '@ngrx/store';
-import { Result } from '../store/result.reducer';
-import { hit, miss } from '../store/result.actions';
-import { Observable, Observer } from 'rxjs';
+import {Component, OnInit} from '@angular/core';
+import {Router} from '@angular/router';
+import {Store} from '@ngrx/store';
+import {Result} from '../store/result.reducer';
+import {hit, miss} from '../store/result.actions';
+import {Observable, Observer} from 'rxjs';
 
 @Component({
   selector: 'app-teaching-phase',
@@ -14,7 +14,7 @@ export class TeachingPhaseComponent implements OnInit {
   iconNames: string[];
   colorNames: string[];
   states: string[];
-  state: number;
+  currentState: number;
   numbers = '0123456789';
   colors = '0123456789';
   usedIcons = '';
@@ -36,14 +36,9 @@ export class TeachingPhaseComponent implements OnInit {
     setInterval(() => observer.next(new Date().toString()), 1000);
   });
 
-
-  constructor(private router: Router, private store: Store<Result>) {
-    this.hitCount$ = this.store.select<number>(store => store.hitCount);
-    this.missCount$ = this.store.select('missCount');
-    this.store.select(store => store).subscribe(store => console.log('store is: ' + store));
-    this.store.select(store => store).subscribe(store => console.log('missCount is: ' + store.missCount));
-    setInterval(() => this.store.dispatch(miss()), 1000);
-
+  constructor(private router: Router, private score: Store<{ result: Result }>) {
+    this.hitCount$ = this.score.select(state => state.result.hitCount);
+    this.missCount$ = this.score.select(state => state.result.missCount);
 
     this.iconNames = [
       'truck',
@@ -79,13 +74,13 @@ export class TeachingPhaseComponent implements OnInit {
     ];
     this.displayIconIndex = Math.floor(Math.random() * 10);
     this.displayColorIndex = Math.floor(Math.random() * 10);
-    this.state = 0;
+    this.currentState = 0;
     this.rounds = 3;
   }
 
   ngOnInit(): void {
     this.startTraining();
-    console.log('component initialzed')
+    console.log('component initialized');
   }
 
   startTraining() {
@@ -93,11 +88,11 @@ export class TeachingPhaseComponent implements OnInit {
     this.interval = setInterval(() => {
       this.teachNext();
     }, this.displayInterval);
-    this.state++;
+    this.currentState++;
   }
 
   restart() {
-    this.state = 0;
+    this.currentState = 0;
     this.roundsCount = 0;
     this.numbers = '0123456789';
     this.colors = '0123456789';
@@ -117,7 +112,7 @@ export class TeachingPhaseComponent implements OnInit {
       this.roundsCount++;
     } else {
       clearInterval(this.interval);
-      this.state++;
+      this.currentState++;
     }
   }
 
@@ -143,13 +138,13 @@ export class TeachingPhaseComponent implements OnInit {
   }
 
   getState(): string {
-    return this.states[this.state];
+    return this.states[this.currentState];
   }
 
   guessIcon(index: number) {
     this.guessedIcons += index;
     if (this.guessedIcons.length === this.rounds) {
-      this.state++;
+      this.currentState++;
     }
   }
 
@@ -160,13 +155,12 @@ export class TeachingPhaseComponent implements OnInit {
         this.guessedIcons === this.usedIcons &&
         this.guessedColors === this.usedColors
       ) {
-        this.state++;
-        this.store.dispatch(hit());
-        console.log('hitCount: ' + this.store.select(state => state.hitCount));
+        this.currentState++;
+        this.score.dispatch(hit());
         return;
       }
-      this.store.dispatch(miss());
-      this.state += 2;
+      this.score.dispatch(miss());
+      this.currentState += 2;
     }
   }
 

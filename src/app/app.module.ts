@@ -1,32 +1,19 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
-import { StoreModule } from '@ngrx/store';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {RouterModule, Routes} from '@angular/router';
+import {StoreModule} from '@ngrx/store';
+import {StoreDevtoolsModule} from '@ngrx/store-devtools';
 
-import { AppComponent } from './app.component';
-import { TeachingPhaseComponent } from './teaching-phase/teaching-phase.component';
-import { HomeComponent } from './home/home.component';
-import { reducer } from './store/result.reducer'
+import {AppComponent} from './app.component';
+import {TeachingPhaseComponent} from './teaching-phase/teaching-phase.component';
+import {HomeComponent} from './home/home.component';
+import {reducer} from './store/result.reducer';
 
 const routes: Routes = [
   // basic routes
   { path: '', redirectTo: 'home', pathMatch: 'full' },
   { path: 'home', component: HomeComponent },
   { path: 'teach', component: TeachingPhaseComponent },
-
-  // authentication demo
-  // { path: 'login', component: LoginComponent }, {
-  //   path: 'protected',
-  //   component: ProtectedComponent, canActivate: [LoggedInGuard]
-  // },
-
-  // nested
-  // {
-  //   path: 'products',
-  //   component: ProductsComponent,
-  //   children: childRoutes
-  // }
 ];
 
 @NgModule({
@@ -38,7 +25,7 @@ const routes: Routes = [
   imports: [
     BrowserModule,
     RouterModule.forRoot(routes),
-    StoreModule.forRoot({ reducer: reducer }),
+    StoreModule.forRoot({ result: reducer }),
     StoreDevtoolsModule.instrument({ maxAge: 10 })
   ],
   providers: [],

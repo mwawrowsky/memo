@@ -1,5 +1,5 @@
-import { createAction } from '@ngrx/store'
+import {createAction} from '@ngrx/store';
 
-export const hit = createAction('[Result] Hit');
-export const miss = createAction('[Result] Miss');
-export const reset = createAction('[Result] Reset');
+export const hit = createAction('[Result View] Hit');
+export const miss = createAction('[Result View] Miss');
+export const reset = createAction('[Result View] Reset');
