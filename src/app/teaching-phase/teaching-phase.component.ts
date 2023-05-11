@@ -6,6 +6,7 @@ import {hit, miss} from '../store/result.actions';
 import {Observable, Observer} from 'rxjs';
 
 const ICON_COUNT = 10;
+const COLOR_COUNT = 10;
 const ROUND_COUNT = 3;
 
 @Component({
@@ -73,7 +74,7 @@ export class TeachingPhaseComponent implements OnInit {
     this.missCount$ = this.score.select(state => state.result.missCount);
 
     this.displayIconIndex = this.getRandomIndex(ICON_COUNT);
-    this.displayColorIndex = this.getRandomIndex(ICON_COUNT);
+    this.displayColorIndex = this.getRandomIndex(COLOR_COUNT);
     this.currentState = 0;
     this.rounds = ROUND_COUNT;
   }
@@ -145,7 +146,7 @@ export class TeachingPhaseComponent implements OnInit {
     return this.states[this.currentState];
   }
 
-// User guesses the icon by providing an index
+  // User guesses the icon by providing an index
   guessIcon(index: number) {
     this.guessedIcons += index;
     if (this.guessedIcons.length === this.rounds) {
@@ -153,11 +154,11 @@ export class TeachingPhaseComponent implements OnInit {
     }
   }
 
-// User guesses the color by providing an index
+  // User guesses the color by providing an index
   guessColor(index: number) {
     this.guessedColors += index;
     if (this.guessedColors.length === this.rounds) {
-// Check if the guessed icons and colors match the used icons and colors
+      // Check if the guessed icons and colors match the used icons and colors
       if (
         this.guessedIcons === this.usedIcons &&
         this.guessedColors === this.usedColors
