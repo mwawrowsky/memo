@@ -64,7 +64,7 @@ export class TeachingPhaseComponent implements OnInit {
   displayColorIndex: number;
   rounds: number;
   roundsCount = 0;
-  displayInterval = 300; // milliseconds;
+  displayInterval = 3000; // milliseconds;
   iconClass: string[];
   colorClass: string[];
   interval: any;
