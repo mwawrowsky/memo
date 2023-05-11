@@ -5,15 +5,47 @@ import {Result} from '../store/result.reducer';
 import {hit, miss} from '../store/result.actions';
 import {Observable, Observer} from 'rxjs';
 
+const ICON_COUNT = 10;
+const ROUND_COUNT = 3;
+
 @Component({
   selector: 'app-teaching-phase',
   templateUrl: './teaching-phase.component.html',
   styleUrls: ['./teaching-phase.component.css']
 })
 export class TeachingPhaseComponent implements OnInit {
-  iconNames: string[];
-  colorNames: string[];
-  states: string[];
+  iconNames: string[] = [
+    'truck',
+    'beer',
+    'bed',
+    'bell',
+    'briefcase',
+    'bicycle',
+    'binoculars',
+    'bomb',
+    'coffee',
+    'fighter jet'
+  ];
+  colorNames: string[] = [
+    'red',
+    'yellow',
+    'green',
+    'blue',
+    'purple',
+    'brown',
+    'grey',
+    'black',
+    'pink',
+    'teal'
+  ];
+  states: string[] = [
+    'start',
+    'teach',
+    'testIcons',
+    'testColors',
+    'correct',
+    'false'
+  ];
   currentState: number;
   numbers = '0123456789';
   colors = '0123456789';
@@ -25,7 +57,7 @@ export class TeachingPhaseComponent implements OnInit {
   displayColorIndex: number;
   rounds: number;
   roundsCount = 0;
-  displayInterval = 300; // millies;
+  displayInterval = 300; // milliseconds;
   iconClass: string[];
   colorClass: string[];
   interval: any;
@@ -40,42 +72,10 @@ export class TeachingPhaseComponent implements OnInit {
     this.hitCount$ = this.score.select(state => state.result.hitCount);
     this.missCount$ = this.score.select(state => state.result.missCount);
 
-    this.iconNames = [
-      'truck',
-      'beer',
-      'bed',
-      'bell',
-      'briefcase',
-      'bicycle',
-      'binoculars',
-      'bomb',
-      'coffee',
-      'fighter jet'
-    ];
-    this.colorNames = [
-      'red',
-      'yellow',
-      'green',
-      'blue',
-      'purple',
-      'brown',
-      'grey',
-      'black',
-      'pink',
-      'teal'
-    ];
-    this.states = [
-      'start',
-      'teach',
-      'testIcons',
-      'testColors',
-      'correct',
-      'false'
-    ];
-    this.displayIconIndex = Math.floor(Math.random() * 10);
-    this.displayColorIndex = Math.floor(Math.random() * 10);
+    this.displayIconIndex = this.getRandomIndex(ICON_COUNT);
+    this.displayColorIndex = this.getRandomIndex(ICON_COUNT);
     this.currentState = 0;
-    this.rounds = 3;
+    this.rounds = ROUND_COUNT;
   }
 
   ngOnInit(): void {
@@ -132,15 +132,20 @@ export class TeachingPhaseComponent implements OnInit {
 
   getUnusedRandomIndex(unusedIndices: string): number {
     const maxIndex: number = unusedIndices.length;
-    const index: number = Math.floor(Math.random() * maxIndex);
+    const index: number = this.getRandomIndex(maxIndex);
     const digit: string = unusedIndices.charAt(index);
     return Number(digit);
+  }
+
+  getRandomIndex(maxIndex: number): number {
+    return Math.floor(Math.random() * maxIndex);
   }
 
   getState(): string {
     return this.states[this.currentState];
   }
 
+// User guesses the icon by providing an index
   guessIcon(index: number) {
     this.guessedIcons += index;
     if (this.guessedIcons.length === this.rounds) {
@@ -148,9 +153,11 @@ export class TeachingPhaseComponent implements OnInit {
     }
   }
 
+// User guesses the color by providing an index
   guessColor(index: number) {
     this.guessedColors += index;
     if (this.guessedColors.length === this.rounds) {
+// Check if the guessed icons and colors match the used icons and colors
       if (
         this.guessedIcons === this.usedIcons &&
         this.guessedColors === this.usedColors
