@@ -54,7 +54,7 @@ export class TeachingPhaseComponent implements OnInit {
   colorNames: ColorName[] = Object.values(ColorName);
   states: ComponentState[] = Object.values(ComponentState);
   currentState: number;
-  numbers: number[] = Array.from({length: this.iconNames.length}, (_, i) => i);
+  icons: number[] = Array.from({length: this.iconNames.length}, (_, i) => i);
   colors: number[] = Array.from({length: this.colorNames.length}, (_, i) => i);
   usedIcons: number[] = [];
   usedColors: number[] = [];
@@ -101,7 +101,7 @@ export class TeachingPhaseComponent implements OnInit {
   restart() {
     this.currentState = 0;
     this.roundsCount = 0;
-    this.numbers = Array.from({length: this.iconNames.length}, (_, i) => i);
+    this.icons = Array.from({length: this.iconNames.length}, (_, i) => i);
     this.colors = Array.from({length: this.colorNames.length}, (_, i) => i);
     this.usedIcons = [];
     this.usedColors = [];
@@ -125,8 +125,8 @@ export class TeachingPhaseComponent implements OnInit {
   }
 
   getUnusedRandomIconIndex(): number {
-    const newIndex: number = this.getUnusedRandomIndex(this.numbers);
-    this.numbers = this.numbers.filter((_, i) => i !== newIndex);
+    const newIndex: number = this.getUnusedRandomIndex(this.icons);
+    this.icons = this.icons.filter((_, i) => i !== newIndex);
     this.usedIcons.push(newIndex);
     return newIndex;
   }
