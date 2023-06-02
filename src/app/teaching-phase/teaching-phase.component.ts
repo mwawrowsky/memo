@@ -52,16 +52,15 @@ enum ComponentState {
 export class TeachingPhaseComponent implements OnInit {
   iconNames: IconName[] = Object.values(IconName);
   colorNames: ColorName[] = Object.values(ColorName);
-  states: ComponentState[] = Object.values(ComponentState);
-  currentState: number;
-  icons: number[] = Array.from({length: this.iconNames.length}, (_, i) => i);
-  colors: number[] = Array.from({length: this.colorNames.length}, (_, i) => i);
-  usedIcons: number[] = [];
-  usedColors: number[] = [];
-  guessedIcons: number[] = [];
-  guessedColors: number[] = [];
-  displayIconIndex: number;
-  displayColorIndex: number;
+  currentState: ComponentState;
+  availableIcons: IconName[] = [...this.iconNames];
+  availableColors: ColorName[] = [...this.colorNames];
+  usedIcons: IconName[] = [];
+  usedColors: ColorName[] = [];
+  guessedIcons: IconName[] = [];
+  guessedColors: ColorName[] = [];
+  displayIcon: IconName;
+  displayColor: ColorName;
   rounds: number;
   roundsCount = 0;
   displayInterval = 3000; // milliseconds;
@@ -75,13 +74,13 @@ export class TeachingPhaseComponent implements OnInit {
     setInterval(() => observer.next(new Date().toString()), 1000);
   });
 
+  protected readonly ComponentState = ComponentState;
+
+
   constructor(private router: Router, private score: Store<{ result: Result }>) {
     this.hitCount$ = this.score.select(state => state.result.hitCount);
     this.missCount$ = this.score.select(state => state.result.missCount);
-
-    this.displayIconIndex = this.getRandomIndex(this.iconNames.length);
-    this.displayColorIndex = this.getRandomIndex(this.colorNames.length);
-    this.currentState = 0;
+    this.currentState = ComponentState.Start;
     this.rounds = ROUND_COUNT;
   }
 
@@ -95,14 +94,14 @@ export class TeachingPhaseComponent implements OnInit {
     this.interval = setInterval(() => {
       this.teachNext();
     }, this.displayInterval);
-    this.currentState++;
+    this.currentState = ComponentState.Teach;
   }
 
   restart() {
-    this.currentState = 0;
+    this.currentState = ComponentState.Teach;
     this.roundsCount = 0;
-    this.icons = Array.from({length: this.iconNames.length}, (_, i) => i);
-    this.colors = Array.from({length: this.colorNames.length}, (_, i) => i);
+    this.availableIcons = [...this.iconNames];
+    this.availableColors = [...this.colorNames];
     this.usedIcons = [];
     this.usedColors = [];
     this.guessedIcons = [];
@@ -113,35 +112,34 @@ export class TeachingPhaseComponent implements OnInit {
 
   teachNext() {
     if (this.roundsCount < this.rounds) {
-      this.displayIconIndex = this.getUnusedRandomIconIndex();
-      this.displayColorIndex = this.getUnusedRandomColorIndex();
-      this.iconClass = [this.iconNames[this.displayIconIndex]];
-      this.colorClass = [this.colorNames[this.displayColorIndex]];
+      this.displayIcon = this.getUnusedRandomIcon();
+      this.displayColor = this.getUnusedRandomColor();
+      this.iconClass = [this.displayIcon];
+      this.colorClass = [this.displayColor];
       this.roundsCount++;
     } else {
       clearInterval(this.interval);
-      this.currentState++;
+      this.currentState = ComponentState.TestIcons;
     }
   }
 
-  getUnusedRandomIconIndex(): number {
-    const newIndex: number = this.getUnusedRandomIndex(this.icons);
-    this.icons = this.icons.filter((_, i) => i !== newIndex);
-    this.usedIcons.push(newIndex);
-    return newIndex;
+  getUnusedRandomIcon(): IconName {
+    const newIcon: IconName = this.getUnusedRandomElement(this.availableIcons);
+    this.availableIcons = this.availableIcons.filter(icon => icon !== newIcon);
+    this.usedIcons.push(newIcon);
+    return newIcon;
   }
 
-  getUnusedRandomColorIndex(): number {
-    const newIndex: number = this.getUnusedRandomIndex(this.colors);
-    this.colors = this.colors.filter((_, i) => i !== newIndex);
-    this.usedColors.push(newIndex);
-    return newIndex;
+  getUnusedRandomColor(): ColorName {
+    const newColor: ColorName = this.getUnusedRandomElement(this.availableColors);
+    this.availableColors = this.availableColors.filter(color => color !== newColor);
+    this.usedColors.push(newColor);
+    return newColor;
   }
 
-  getUnusedRandomIndex(unusedIndices: number[]): number {
-    const maxIndex: number = unusedIndices.length;
-    const index: number = this.getRandomIndex(maxIndex);
-    return unusedIndices[index];
+  getUnusedRandomElement<T>(elements: T[]): T {
+    const index: number = this.getRandomIndex(elements.length);
+    return elements[index];
   }
 
   getRandomIndex(maxIndex: number): number {
@@ -149,43 +147,43 @@ export class TeachingPhaseComponent implements OnInit {
   }
 
   getState(): string {
-    return this.states[this.currentState];
+    return this.currentState;
   }
 
-  // User guesses the icon by providing an index
-  guessIcon(index: number) {
-    this.guessedIcons.push(index);
+  // User guesses the icon by providing an icon name
+  guessIcon(iconName: IconName) {
+    this.guessedIcons.push(iconName);
     if (this.guessedIcons.length === this.rounds) {
-      this.currentState++;
+      this.currentState = ComponentState.TestColors;
     }
   }
 
-  // User guesses the color by providing an index
-  guessColor(index: number) {
-    this.guessedColors.push(index);
+  // User guesses the color by providing a color name
+  guessColor(colorName: ColorName) {
+    this.guessedColors.push(colorName);
     if (this.guessedColors.length === this.rounds) {
       if (
         this.arrayEquals(this.guessedIcons, this.usedIcons) &&
         this.arrayEquals(this.guessedColors, this.usedColors)
       ) {
-        this.currentState++;
+        this.currentState = ComponentState.Correct;
         this.score.dispatch(hit());
         return;
       }
       this.score.dispatch(miss());
-      this.currentState += 2;
+      this.currentState = ComponentState.False;
     }
   }
 
-  arrayEquals(a: number[], b: number[]): boolean {
+  arrayEquals(a: any[], b: any[]): boolean {
     return a.length === b.length && a.every((val, index) => val === b[index]);
   }
 
   getTrainedIconName(index: number): string {
-    return this.iconNames[this.usedIcons[index]];
+    return this.usedIcons[index];
   }
 
   getTrainedColorName(index: number): string {
-    return this.colorNames[this.usedColors[index]];
+    return this.usedColors[index];
   }
 }
