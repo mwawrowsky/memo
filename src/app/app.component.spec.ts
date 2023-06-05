@@ -5,7 +5,7 @@ import { TeachingPhaseComponent } from './teaching-phase/teaching-phase.componen
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-    declarations: [AppComponent]
+    imports: [AppComponent]
 }).compileComponents();
   }));
 
