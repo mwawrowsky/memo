@@ -5,10 +5,8 @@ import { TeachingPhaseComponent } from './teaching-phase/teaching-phase.componen
 describe('AppComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        AppComponent
-      ],
-    }).compileComponents();
+    declarations: [AppComponent]
+}).compileComponents();
   }));
 
   it('should create the app', () => {

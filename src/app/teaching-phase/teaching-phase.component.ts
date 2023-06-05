@@ -4,6 +4,7 @@ import {Store} from '@ngrx/store';
 import {Result} from '../store/result.reducer';
 import {hit, miss} from '../store/result.actions';
 import {Observable, Observer} from 'rxjs';
+import { NgIf, NgClass, NgFor, AsyncPipe } from '@angular/common';
 
 const ROUND_COUNT = 3;
 
@@ -45,9 +46,11 @@ enum ComponentState {
 }
 
 @Component({
-  selector: 'app-teaching-phase',
-  templateUrl: './teaching-phase.component.html',
-  styleUrls: ['./teaching-phase.component.css']
+    selector: 'app-teaching-phase',
+    templateUrl: './teaching-phase.component.html',
+    styleUrls: ['./teaching-phase.component.css'],
+    standalone: true,
+    imports: [NgIf, NgClass, NgFor, AsyncPipe]
 })
 export class TeachingPhaseComponent implements OnInit {
   iconNames: IconName[] = Object.values(IconName);

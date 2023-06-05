@@ -17,18 +17,16 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    TeachingPhaseComponent,
-    HomeComponent
-  ],
-  imports: [
-    BrowserModule,
-    RouterModule.forRoot(routes),
-    StoreModule.forRoot({ result: reducer }),
-    StoreDevtoolsModule.instrument({ maxAge: 10 })
-  ],
-  providers: [],
-  bootstrap: [AppComponent]
+    declarations: [AppComponent],
+    imports: [
+        BrowserModule,
+        RouterModule.forRoot(routes),
+        StoreModule.forRoot({ result: reducer }),
+        StoreDevtoolsModule.instrument({ maxAge: 10 }),
+        TeachingPhaseComponent,
+        HomeComponent
+    ],
+    providers: [],
+    bootstrap: [AppComponent]
 })
 export class AppModule { }
