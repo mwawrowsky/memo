@@ -1,10 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectorRef} from '@angular/core';
 import {Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {Result} from '../store/result.reducer';
 import {hit, miss} from '../store/result.actions';
 import {Observable, Observer} from 'rxjs';
-import { NgIf, NgClass, NgFor, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 
 const ROUND_COUNT = 3;
 
@@ -50,7 +50,7 @@ enum ComponentState {
     templateUrl: './teaching-phase.component.html',
     styleUrls: ['./teaching-phase.component.css'],
     standalone: true,
-    imports: [NgIf, NgClass, NgFor, AsyncPipe]
+    imports: [AsyncPipe]
 })
 export class TeachingPhaseComponent implements OnInit {
   iconNames: IconName[] = Object.values(IconName);
@@ -80,7 +80,7 @@ export class TeachingPhaseComponent implements OnInit {
   protected readonly ComponentState = ComponentState;
 
 
-  constructor(private router: Router, private score: Store<{ result: Result }>) {
+  constructor(private router: Router, private score: Store<{ result: Result }>, private cdr: ChangeDetectorRef) {
     this.hitCount$ = this.score.select(state => state.result.hitCount);
     this.missCount$ = this.score.select(state => state.result.missCount);
     this.currentState = ComponentState.Start;
@@ -89,15 +89,14 @@ export class TeachingPhaseComponent implements OnInit {
 
   ngOnInit(): void {
     this.startTraining();
-    console.log('component initialized');
   }
 
   startTraining() {
+    this.currentState = ComponentState.Teach;
     this.teachNext();
     this.interval = setInterval(() => {
       this.teachNext();
     }, this.displayInterval);
-    this.currentState = ComponentState.Teach;
   }
 
   restart() {
@@ -120,9 +119,11 @@ export class TeachingPhaseComponent implements OnInit {
       this.iconClass = [this.displayIcon];
       this.colorClass = [this.displayColor];
       this.roundsCount++;
+      this.cdr.detectChanges();
     } else {
       clearInterval(this.interval);
       this.currentState = ComponentState.TestIcons;
+      this.cdr.detectChanges();
     }
   }
 
