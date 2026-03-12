@@ -1,4 +1,4 @@
-import {Component, OnInit, ChangeDetectorRef} from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import {Router} from '@angular/router';
 import {Store} from '@ngrx/store';
 import {Result} from '../store/result.reducer';
@@ -69,7 +69,7 @@ export class TeachingPhaseComponent implements OnInit {
   displayInterval = 3000; // milliseconds;
   iconClass: string[];
   colorClass: string[];
-  interval: any;
+  interval?: ReturnType<typeof setInterval>;
   hitCount$: Observable<number>;
   missCount$: Observable<number>;
   hitCount: number;
@@ -80,7 +80,11 @@ export class TeachingPhaseComponent implements OnInit {
   protected readonly ComponentState = ComponentState;
 
 
-  constructor(private router: Router, private score: Store<{ result: Result }>, private cdr: ChangeDetectorRef) {
+  private readonly router = inject(Router);
+  private readonly score = inject<Store<{ result: Result }>>(Store);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  constructor() {
     this.hitCount$ = this.score.select(state => state.result.hitCount);
     this.missCount$ = this.score.select(state => state.result.missCount);
     this.currentState = ComponentState.Start;
@@ -150,10 +154,6 @@ export class TeachingPhaseComponent implements OnInit {
     return Math.floor(Math.random() * maxIndex);
   }
 
-  getState(): string {
-    return this.currentState;
-  }
-
   // User guesses the icon by providing an icon name
   guessIcon(iconName: IconName) {
     this.guessedIcons.push(iconName);
@@ -179,7 +179,7 @@ export class TeachingPhaseComponent implements OnInit {
     }
   }
 
-  arrayEquals(a: any[], b: any[]): boolean {
+  arrayEquals<T>(a: T[], b: T[]): boolean {
     return a.length === b.length && a.every((val, index) => val === b[index]);
   }
 

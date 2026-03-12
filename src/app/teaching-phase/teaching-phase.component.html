@@ -1,4 +1,4 @@
-@if (ComponentState.Teach == getState()) {
+@if (currentState === ComponentState.Teach) {
   <div class="ui container">
     <h1>Teaching Phase</h1>
     <div class="ui grid">
@@ -11,13 +11,13 @@
   </div>
 }
 
-@if (ComponentState.TestIcons == getState() || ComponentState.TestColors == getState()) {
+@if (currentState === ComponentState.TestIcons || currentState === ComponentState.TestColors) {
   <div class="ui container">
     <h1>Testing Phase</h1>
     <div class="three wide column" style="padding-bottom: 1em;">
       <p>Click in the order of appearance.</p>
     </div>
-    @if (ComponentState.TestIcons == getState()) {
+    @if (currentState === ComponentState.TestIcons) {
       <div class="ui grid">
         @for (iconName of iconNames; track iconName) {
           <div class="three wide column">
@@ -28,7 +28,7 @@
         }
       </div>
     }
-    @if (ComponentState.TestColors == getState()) {
+    @if (currentState === ComponentState.TestColors) {
       <div class="ui grid">
         @for (color of colorNames; track color) {
           <div class="three wide column">
@@ -43,7 +43,7 @@
   </div>
 }
 
-@if (ComponentState.Correct == getState()) {
+@if (currentState === ComponentState.Correct) {
   <div class="ui container">
     <h1>Congratulations!</h1>
     <div class="ui grid">
@@ -56,7 +56,7 @@
   </div>
 }
 
-@if (ComponentState.False == getState()) {
+@if (currentState === ComponentState.False) {
   <div class="ui container">
     <h1>Sorry</h1>
     <div class="ui grid">
@@ -69,7 +69,7 @@
   </div>
 }
 
-@if (ComponentState.Correct == getState() || ComponentState.False == getState()) {
+@if (currentState === ComponentState.Correct || currentState === ComponentState.False) {
   <div class="ui container">
     <h2 style="padding-top: 1em;">The solution was</h2>
     <div class="ui grid">
