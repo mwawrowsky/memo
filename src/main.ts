@@ -1,16 +1,17 @@
 import {enableProdMode, importProvidersFrom} from '@angular/core';
-import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 
 
 import {environment} from './environments/environment';
 import {AppComponent} from './app/app.component';
-import {StoreDevtoolsModule} from '@ngrx/store-devtools';
 import {reducer} from './app/store/result.reducer';
-import {StoreModule} from '@ngrx/store';
+import {provideStore} from '@ngrx/store';
+import {provideStoreDevtools} from '@ngrx/store-devtools';
 import {TeachingPhaseComponent} from './app/teaching-phase/teaching-phase.component';
 import {HomeComponent} from './app/home/home.component';
 import {provideRouter, Routes} from '@angular/router';
 import {BrowserModule, bootstrapApplication} from '@angular/platform-browser';
+import { provideZonelessChangeDetection } from '@angular/core';
+
 
 const routes: Routes = [
   // basic routes
@@ -26,9 +27,9 @@ if (environment.production) {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    importProvidersFrom(BrowserModule,
-      StoreModule.forRoot({result: reducer}),
-      StoreDevtoolsModule.instrument({maxAge: 10})),
+    provideZonelessChangeDetection(),
+    provideStore({result: reducer}),
+    provideStoreDevtools({maxAge: 10, logOnly: environment.production}),
     provideRouter(routes)
   ]
 })
