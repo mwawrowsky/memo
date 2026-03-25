@@ -1,10 +1,11 @@
-import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import {Router} from '@angular/router';
-import {Store} from '@ngrx/store';
-import {Result} from '../store/result.reducer';
-import {hit, miss} from '../store/result.actions';
-import {Observable, Observer} from 'rxjs';
 import { AsyncPipe } from '@angular/common';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+
+import { hit, miss } from '../store/result.actions';
+import { Result } from '../store/result.reducer';
 
 const ROUND_COUNT = 3;
 
@@ -19,7 +20,6 @@ enum IconName {
   Bomb = 'bomb',
   Coffee = 'coffee',
   FighterJet = 'fighter jet',
-  // Add more icons here
 }
 
 enum ColorName {
@@ -33,7 +33,6 @@ enum ColorName {
   Black = 'black',
   Pink = 'pink',
   Teal = 'teal',
-  // Add more colors here
 }
 
 enum ComponentState {
@@ -42,43 +41,37 @@ enum ComponentState {
   TestIcons = 'testIcons',
   TestColors = 'testColors',
   Correct = 'correct',
-  False = 'false'
+  False = 'false',
 }
 
 @Component({
-    selector: 'app-teaching-phase',
-    templateUrl: './teaching-phase.component.html',
-    styleUrls: ['./teaching-phase.component.css'],
-    standalone: true,
-    imports: [AsyncPipe]
+  selector: 'app-teaching-phase',
+  templateUrl: './teaching-phase.component.html',
+  styleUrls: ['./teaching-phase.component.css'],
+  standalone: true,
+  imports: [AsyncPipe],
 })
-export class TeachingPhaseComponent implements OnInit {
-  iconNames: IconName[] = Object.values(IconName);
-  colorNames: ColorName[] = Object.values(ColorName);
-  currentState: ComponentState;
+export class TeachingPhaseComponent implements OnInit, OnDestroy {
+  readonly iconNames: IconName[] = Object.values(IconName);
+  readonly colorNames: ColorName[] = Object.values(ColorName);
+  readonly hitCount$: Observable<number>;
+  readonly missCount$: Observable<number>;
+
+  currentState = ComponentState.Start;
   availableIcons: IconName[] = [...this.iconNames];
   availableColors: ColorName[] = [...this.colorNames];
   usedIcons: IconName[] = [];
   usedColors: ColorName[] = [];
   guessedIcons: IconName[] = [];
   guessedColors: ColorName[] = [];
-  displayIcon: IconName;
-  displayColor: ColorName;
-  rounds: number;
+  displayIcon: IconName = this.iconNames[0];
+  displayColor: ColorName = this.colorNames[0];
+  rounds = ROUND_COUNT;
   roundsCount = 0;
-  displayInterval = 3000; // milliseconds;
-  iconClass: string[];
-  colorClass: string[];
+  displayInterval = 3000;
   interval?: ReturnType<typeof setInterval>;
-  hitCount$: Observable<number>;
-  missCount$: Observable<number>;
-  hitCount: number;
-  time = new Observable<string>((observer: Observer<string>) => {
-    setInterval(() => observer.next(new Date().toString()), 1000);
-  });
 
   protected readonly ComponentState = ComponentState;
-
 
   private readonly router = inject(Router);
   private readonly score = inject<Store<{ result: Result }>>(Store);
@@ -87,23 +80,25 @@ export class TeachingPhaseComponent implements OnInit {
   constructor() {
     this.hitCount$ = this.score.select(state => state.result.hitCount);
     this.missCount$ = this.score.select(state => state.result.missCount);
-    this.currentState = ComponentState.Start;
-    this.rounds = ROUND_COUNT;
   }
 
   ngOnInit(): void {
     this.startTraining();
   }
 
-  startTraining() {
-    this.currentState = ComponentState.Teach;
-    this.teachNext();
-    this.interval = setInterval(() => {
-      this.teachNext();
-    }, this.displayInterval);
+  ngOnDestroy(): void {
+    this.stopTrainingTimer();
   }
 
-  restart() {
+  startTraining(): void {
+    this.currentState = ComponentState.Teach;
+    this.teachNext();
+    this.stopTrainingTimer();
+    this.interval = setInterval(() => this.teachNext(), this.displayInterval);
+  }
+
+  restart(): void {
+    this.stopTrainingTimer();
     this.currentState = ComponentState.Teach;
     this.roundsCount = 0;
     this.availableIcons = [...this.iconNames];
@@ -112,71 +107,66 @@ export class TeachingPhaseComponent implements OnInit {
     this.usedColors = [];
     this.guessedIcons = [];
     this.guessedColors = [];
-    this.router.navigate(['home']);
+    void this.router.navigate(['home']);
   }
 
-
-  teachNext() {
+  teachNext(): void {
     if (this.roundsCount < this.rounds) {
       this.displayIcon = this.getUnusedRandomIcon();
       this.displayColor = this.getUnusedRandomColor();
-      this.iconClass = [this.displayIcon];
-      this.colorClass = [this.displayColor];
       this.roundsCount++;
       this.cdr.detectChanges();
-    } else {
-      clearInterval(this.interval);
-      this.currentState = ComponentState.TestIcons;
-      this.cdr.detectChanges();
+      return;
     }
+
+    this.stopTrainingTimer();
+    this.currentState = ComponentState.TestIcons;
+    this.cdr.detectChanges();
   }
 
   getUnusedRandomIcon(): IconName {
-    const newIcon: IconName = this.getUnusedRandomElement(this.availableIcons);
+    const newIcon = this.getUnusedRandomElement(this.availableIcons);
     this.availableIcons = this.availableIcons.filter(icon => icon !== newIcon);
     this.usedIcons.push(newIcon);
     return newIcon;
   }
 
   getUnusedRandomColor(): ColorName {
-    const newColor: ColorName = this.getUnusedRandomElement(this.availableColors);
+    const newColor = this.getUnusedRandomElement(this.availableColors);
     this.availableColors = this.availableColors.filter(color => color !== newColor);
     this.usedColors.push(newColor);
     return newColor;
   }
 
   getUnusedRandomElement<T>(elements: T[]): T {
-    const index: number = this.getRandomIndex(elements.length);
-    return elements[index];
+    return elements[this.getRandomIndex(elements.length)];
   }
 
   getRandomIndex(maxIndex: number): number {
     return Math.floor(Math.random() * maxIndex);
   }
 
-  // User guesses the icon by providing an icon name
-  guessIcon(iconName: IconName) {
+  guessIcon(iconName: IconName): void {
     this.guessedIcons.push(iconName);
     if (this.guessedIcons.length === this.rounds) {
       this.currentState = ComponentState.TestColors;
     }
   }
 
-  // User guesses the color by providing a color name
-  guessColor(colorName: ColorName) {
+  guessColor(colorName: ColorName): void {
     this.guessedColors.push(colorName);
-    if (this.guessedColors.length === this.rounds) {
-      if (
-        this.arrayEquals(this.guessedIcons, this.usedIcons) &&
-        this.arrayEquals(this.guessedColors, this.usedColors)
-      ) {
-        this.currentState = ComponentState.Correct;
-        this.score.dispatch(hit());
-        return;
-      }
-      this.score.dispatch(miss());
-      this.currentState = ComponentState.False;
+    if (this.guessedColors.length !== this.rounds) {
+      return;
     }
+
+    if (this.arrayEquals(this.guessedIcons, this.usedIcons) && this.arrayEquals(this.guessedColors, this.usedColors)) {
+      this.currentState = ComponentState.Correct;
+      this.score.dispatch(hit());
+      return;
+    }
+
+    this.score.dispatch(miss());
+    this.currentState = ComponentState.False;
   }
 
   arrayEquals<T>(a: T[], b: T[]): boolean {
@@ -189,5 +179,12 @@ export class TeachingPhaseComponent implements OnInit {
 
   getTrainedColorName(index: number): string {
     return this.usedColors[index];
+  }
+
+  private stopTrainingTimer(): void {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = undefined;
+    }
   }
 }
