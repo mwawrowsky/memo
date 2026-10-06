@@ -51,16 +51,16 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 
 - [x] **2.1 Intervall beim Verlassen der Seite stoppen** (S), erledigt in #90
   - `ngOnDestroy` ruft `stopTrainingTimer()` auf.
-  - Offen: ein Test dafür (Komponente zerstören, Uhr weiterlaufen lassen, dabei darf kein Fehler auftreten). Wird in 2.2 mitgemacht.
-- [ ] **2.2 Restlichen toten Code entfernen** (S)
+  - Der Test dafür (Komponente zerstören, Uhr weiterlaufen lassen) kam mit 2.2 dazu.
+- [x] **2.2 Restlichen toten Code entfernen** (S)
   - Erledigt in #90: `time`-Observable, `hitCount`, `iconClass`, `colorClass`.
-  - Offen: `getTrainedIconName`/`getTrainedColorName` durch `usedIcons[idx]`/`usedColors[idx]` im Template ersetzen und den Test für 2.1 ergänzen.
-- [ ] **2.3 `restart()` und die Action `reset` klären** (S) ⚖️
-  - Das Zurücksetzen in `restart()` ist wirkungslos, weil die Komponente direkt danach zerstört wird (nur das Stoppen des Timers ist sinnvoll), und `reset` wird nirgends ausgelöst.
-  - Option A: Zurücksetzen und `reset` entfernen. Option B: Einen Button „Statistik zurücksetzen“ anbieten, der `reset` auslöst.
-- [ ] **2.4 Kein verschachteltes `detectChanges()` in `ngOnInit`** (S)
-  - `startTraining()` ruft über `teachNext()` noch während der ersten Change Detection `cdr.detectChanges()` auf. Das ist in den Tests aufgefallen.
-  - Erledigt sich weitgehend mit 5.1 (Signals). Falls 5.1 später kommt: `markForCheck()` statt `detectChanges()` verwenden.
+  - `getTrainedIconName`/`getTrainedColorName` sind entfernt; das Template nutzt die `@for`-Variable und `usedColors[idx]`. Den Test für 2.1 gibt es jetzt.
+- [x] **2.3 `restart()` und die Action `reset` klären** (S)
+  - `restart()` stoppt nur noch den Timer und navigiert nach Hause; das wirkungslose Zurücksetzen des Zustands ist entfernt.
+  - Entscheidung: Option B. In der Ergebnisansicht löst der Button „Reset statistics“ die Action `reset` aus.
+- [x] **2.4 Kein verschachteltes `detectChanges()` in `ngOnInit`** (S)
+  - `teachNext()` ruft jetzt `markForCheck()` statt `detectChanges()` auf; der zoneless Scheduler rendert danach selbst.
+  - Ein Test prüft, dass die Anzeige nach dem Timer-Tick ohne manuelles `detectChanges()` aktualisiert wird. Mit 5.1 (Signals) entfällt auch `markForCheck()`.
 
 ## Phase 3: Typsicherheit
 
@@ -110,6 +110,5 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 
 | Schritt | Frage |
 |---|---|
-| 2.3 | Action `reset` entfernen oder als „Statistik zurücksetzen“ nutzen? |
 | 7.1 | Angular Material einführen oder bei Semantic UI (bzw. Fomantic UI) bleiben? |
 | 7.2 | Auf Vitest umsteigen oder bei Karma bleiben? |

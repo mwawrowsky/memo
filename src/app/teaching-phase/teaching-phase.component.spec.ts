@@ -78,6 +78,16 @@ describe('TeachingPhaseComponent', () => {
       component.displayIcon.split(' ').forEach(cls => expect(icon?.classList).toContain(cls));
     });
 
+    it('should render the next round when the timer fires', async () => {
+      const firstIcon = component.displayIcon;
+      jasmine.clock().tick(component.displayInterval);
+      await fixture.whenStable();
+
+      const icon = element().querySelector('button i');
+      expect(component.displayIcon).not.toBe(firstIcon);
+      component.displayIcon.split(' ').forEach(cls => expect(icon?.classList).toContain(cls));
+    });
+
     it('should show the next round after each display interval', () => {
       jasmine.clock().tick(component.displayInterval);
       expect(component.roundsCount).toBe(2);
@@ -196,7 +206,7 @@ describe('TeachingPhaseComponent', () => {
   });
 
   describe('restart', () => {
-    it('should reset the game and navigate home', () => {
+    it('should navigate home', () => {
       const router = TestBed.inject(Router);
       const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
       finishTeaching();
@@ -206,13 +216,50 @@ describe('TeachingPhaseComponent', () => {
       component.restart();
 
       expect(navigateSpy).toHaveBeenCalledOnceWith(['home']);
-      expect(component.roundsCount).toBe(0);
-      expect(component.usedIcons).toEqual([]);
-      expect(component.usedColors).toEqual([]);
-      expect(component.guessedIcons).toEqual([]);
-      expect(component.guessedColors).toEqual([]);
-      expect(component.availableIcons).toEqual(component.iconNames);
-      expect(component.availableColors).toEqual(component.colorNames);
+    });
+
+    it('should stop the teaching timer when restarting during the teaching phase', () => {
+      spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+      component.restart();
+      jasmine.clock().tick(component.displayInterval * component.rounds);
+
+      expect(component.roundsCount).toBe(1);
+    });
+  });
+
+  describe('reset statistics', () => {
+    const result = (): Promise<Result> => firstValueFrom(store.select(state => state.result));
+
+    beforeEach(() => {
+      finishTeaching();
+      guessAllIcons();
+      guessAllColors();
+      render();
+    });
+
+    it('should reset the hit/miss counters in the store', async () => {
+      expect(await result()).toEqual({ hitCount: 1, missCount: 0 });
+
+      element().querySelector<HTMLButtonElement>('button.reset-statistics')?.click();
+
+      expect(await result()).toEqual({ hitCount: 0, missCount: 0 });
+    });
+
+    it('should show the reset ratio', async () => {
+      element().querySelector<HTMLButtonElement>('button.reset-statistics')?.click();
+      await fixture.whenStable();
+
+      expect(element().textContent).toContain('Your hit/miss ratio is 0 : 0.');
+    });
+  });
+
+  describe('destroy', () => {
+    it('should stop the teaching timer when the component is destroyed', () => {
+      fixture.destroy();
+
+      expect(() => jasmine.clock().tick(component.displayInterval * component.rounds)).not.toThrow();
+      expect(component.roundsCount).toBe(1);
     });
   });
 
