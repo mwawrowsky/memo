@@ -20,7 +20,7 @@ Legende: **S** = klein (< 30 min), **M** = mittel, **L** = groß · ⚖️ = vor
   - Angular 21.2.4 → 21.2.25, NgRx 21.0.1 → 21.1.1, typescript-eslint 8.71, ESLint 9.39.5; die Mindestversionen in der `package.json` sind angehoben.
   - Behoben: alle Schwachstellen in Produktionsabhängigkeiten (u. a. XSS in `@angular/compiler`, DoS in `@angular/common`); `npm audit --omit=dev` meldet 0.
   - Offen: 13 Funde in Dev-Tooling (`braces`/`chokidar` über Karma und `webpack-dev-server`, `uuid` über `sockjs`). Dafür gibt es keinen nicht-brechenden Fix; sie entfallen mit 7.2.
-- [ ] **0.3 CI-Workflow (GitHub Actions)** (S) ⚖️
+- [x] **0.3 CI-Workflow (GitHub Actions)** (S)
   - `npm ci`, `ng lint`, `ng build`, `ng test --watch=false --browsers=ChromeHeadless` bei jedem PR.
   - Warum: Jeder folgende Schritt wird automatisch geprüft.
 
@@ -109,7 +109,6 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 
 | Schritt | Frage |
 |---|---|
-| 0.3 | CI mit GitHub Actions einrichten? |
 | 2.3 | Action `reset` entfernen oder als „Statistik zurücksetzen“ nutzen? |
 | 7.1 | Angular Material einführen oder bei Semantic UI (bzw. Fomantic UI) bleiben? |
 | 7.2 | Auf Vitest umsteigen oder bei Karma bleiben? |
