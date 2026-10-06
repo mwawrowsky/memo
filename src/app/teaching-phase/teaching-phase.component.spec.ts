@@ -17,8 +17,11 @@ describe('TeachingPhaseComponent', () => {
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
   const heading = (): string | undefined => element().querySelector('h1')?.textContent ?? undefined;
-  const gridButtons = (): HTMLButtonElement[] =>
-    Array.from(element().querySelectorAll<HTMLButtonElement>('.ui.grid button'));
+  const choiceButtons = (): HTMLButtonElement[] =>
+    Array.from(element().querySelectorAll<HTMLButtonElement>('.choices button'));
+  // Material Symbols are ligatures: the icon name is the text of the <mat-icon>.
+  const iconName = (parent: Element | null | undefined): string | undefined =>
+    parent?.querySelector('mat-icon')?.textContent?.trim();
 
   // Lets the teaching interval run until every round has been shown.
   const finishTeaching = (): void => {
@@ -73,26 +76,26 @@ describe('TeachingPhaseComponent', () => {
     });
 
     it('should render the current icon with its background color', () => {
-      const item = element().querySelector('.memo-item [role="img"]');
-      const icon = item?.querySelector('i');
+      const item = element().querySelector('.stage [role="img"]');
 
       expect(heading()).toContain('Teaching Phase');
       expect(item?.classList).toContain(game.displayColor() ?? '');
-      (game.displayIcon() ?? '').split(' ').forEach(cls => expect(icon?.classList).toContain(cls));
+      expect(iconName(item)).toBe(game.displayIcon());
     });
 
     it('should describe the current icon and color for screen readers', () => {
-      const item = element().querySelector('.memo-item [role="img"]');
+      const item = element().querySelector('.stage [role="img"]');
       const icon = game.displayIcon() ?? game.iconNames[0];
       const color = game.displayColor() ?? game.colorNames[0];
 
       expect(item?.getAttribute('aria-label')).toBe(`${toLabel(icon)} on ${toLabel(color)}`);
-      expect(item?.querySelector('i')?.getAttribute('aria-hidden')).toBe('true');
+      expect(item?.querySelector('mat-icon')?.getAttribute('aria-hidden')).toBe('true');
       expect(element().querySelector('[aria-live]')?.contains(item ?? null)).toBe(true);
     });
 
     it('should not show the color name as visible text', () => {
-      expect(element().querySelector('.memo-item')?.textContent?.trim()).toBe('');
+      // The only text is the icon ligature.
+      expect(element().querySelector('.stage')?.textContent?.trim()).toBe(game.displayIcon());
     });
 
     it('should not render the displayed item as a button', () => {
@@ -104,9 +107,8 @@ describe('TeachingPhaseComponent', () => {
       vi.advanceTimersByTime(game.displayInterval);
       await fixture.whenStable();
 
-      const icon = element().querySelector('.memo-item i');
       expect(game.displayIcon()).not.toBe(firstIcon);
-      (game.displayIcon() ?? '').split(' ').forEach(cls => expect(icon?.classList).toContain(cls));
+      expect(iconName(element().querySelector('.stage'))).toBe(game.displayIcon());
     });
   });
 
@@ -118,20 +120,21 @@ describe('TeachingPhaseComponent', () => {
 
     it('should offer every icon to choose from', () => {
       expect(heading()).toContain('Testing Phase');
-      expect(gridButtons().length).toBe(game.iconNames.length);
+      expect(choiceButtons().length).toBe(game.iconNames.length);
     });
 
     it('should name every icon button', () => {
-      expect(gridButtons().map(button => button.getAttribute('aria-label'))).toEqual(game.iconNames.map(toLabel));
-      gridButtons().forEach(button => expect(button.querySelector('i')?.getAttribute('aria-hidden')).toBe('true'));
+      expect(choiceButtons().map(button => button.getAttribute('aria-label'))).toEqual(game.iconNames.map(toLabel));
+      choiceButtons().forEach(button => expect(button.querySelector('mat-icon')?.getAttribute('aria-hidden')).toBe('true'));
+      expect(choiceButtons().map(button => iconName(button))).toEqual(game.iconNames);
     });
 
     it('should name the color buttons for screen readers only', () => {
       [...game.usedIcons()].forEach(icon => game.guessIcon(icon));
       fixture.detectChanges();
 
-      expect(gridButtons().map(button => button.getAttribute('aria-label'))).toEqual(game.colorNames.map(toLabel));
-      gridButtons().forEach(button => {
+      expect(choiceButtons().map(button => button.getAttribute('aria-label'))).toEqual(game.colorNames.map(toLabel));
+      choiceButtons().forEach(button => {
         expect(button.textContent?.trim()).toBe('');
         expect(button.hasAttribute('title')).toBe(false);
       });
@@ -147,7 +150,7 @@ describe('TeachingPhaseComponent', () => {
     });
 
     it('should record a guess when an icon button is clicked', () => {
-      gridButtons()[0].click();
+      choiceButtons()[0].click();
 
       expect(game.guessedIcons()).toEqual([game.iconNames[0]]);
     });
@@ -156,15 +159,15 @@ describe('TeachingPhaseComponent', () => {
       [...game.usedIcons()].forEach(icon => game.guessIcon(icon));
       fixture.detectChanges();
 
-      expect(gridButtons().length).toBe(game.colorNames.length);
-      gridButtons().forEach((button, idx) => expect(button.classList).toContain(game.colorNames[idx]));
+      expect(choiceButtons().length).toBe(game.colorNames.length);
+      choiceButtons().forEach((button, idx) => expect(button.classList).toContain(game.colorNames[idx]));
     });
 
     it('should record a guess when a color button is clicked', () => {
       [...game.usedIcons()].forEach(icon => game.guessIcon(icon));
       fixture.detectChanges();
 
-      gridButtons()[0].click();
+      choiceButtons()[0].click();
 
       expect(game.guessedColors()).toEqual([game.colorNames[0]]);
     });
@@ -172,7 +175,7 @@ describe('TeachingPhaseComponent', () => {
 
   describe('guess input', () => {
     const iconButton = (icon: string): HTMLButtonElement | undefined =>
-      gridButtons().find(button => icon.split(' ').every(cls => button.querySelector('i')?.classList.contains(cls)));
+      choiceButtons().find(button => iconName(button) === icon);
     const undoButton = (): HTMLButtonElement | null => element().querySelector<HTMLButtonElement>('button.undo-guess');
     const progressText = (): string | undefined => element().querySelector('.guess-count')?.textContent?.trim();
 
@@ -184,7 +187,7 @@ describe('TeachingPhaseComponent', () => {
     it('should show the progress and disable undo before the first guess', () => {
       expect(progressText()).toBe(`0 of ${game.rounds} selected`);
       expect(undoButton()?.disabled).toBe(true);
-      expect(gridButtons().every(button => !button.disabled)).toBe(true);
+      expect(choiceButtons().every(button => !button.disabled)).toBe(true);
     });
 
     it('should disable a guessed icon and show it in the progress', async () => {
@@ -218,7 +221,7 @@ describe('TeachingPhaseComponent', () => {
 
       const [firstColor] = game.usedColors();
       const colorButton = (): HTMLButtonElement | undefined =>
-        gridButtons().find(button => button.classList.contains(firstColor));
+        choiceButtons().find(button => button.classList.contains(firstColor));
       colorButton()?.click();
       await fixture.whenStable();
 
@@ -247,22 +250,23 @@ describe('TeachingPhaseComponent', () => {
     it('should show the solution', () => {
       playGame(true);
 
-      const solutionItems = Array.from(element().querySelectorAll('ol.solution [role="img"]'));
+      const solutionItems = Array.from(element().querySelectorAll('ol.solution > li > [role="img"]'));
       expect(solutionItems.length).toBe(game.rounds);
       solutionItems.forEach((item, idx) => {
         expect(item.classList).toContain(game.usedColors()[idx]);
-        game.usedIcons()[idx].split(' ').forEach(cls => expect(item.querySelector('i')?.classList).toContain(cls));
+        expect(iconName(item)).toBe(game.usedIcons()[idx]);
       });
     });
 
     it('should describe the solution for screen readers', () => {
       playGame(true);
 
-      const labels = Array.from(element().querySelectorAll('ol.solution [role="img"]')).map(item =>
+      const labels = Array.from(element().querySelectorAll('ol.solution > li > [role="img"]')).map(item =>
         item.getAttribute('aria-label'),
       );
       expect(labels).toEqual(game.solution().map(step => `${toLabel(step.icon)} on ${toLabel(step.color)}`));
-      expect(element().querySelector('ol.solution')?.textContent?.trim()).toBe('');
+      // The only text is the icon ligatures.
+      expect(element().querySelector('ol.solution')?.textContent?.replace(/\s+/g, '')).toBe(game.usedIcons().join(''));
     });
 
     it('should only offer restart and reset as buttons', () => {

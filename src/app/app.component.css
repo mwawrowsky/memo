@@ -1,0 +1,9 @@
+mat-toolbar {
+  gap: 0.5em;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}

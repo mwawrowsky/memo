@@ -131,7 +131,7 @@ describe('GameService', () => {
 
       game.start();
 
-      expect(game.usedIcons()).toEqual([IconName.FighterJet]);
+      expect(game.usedIcons()).toEqual([IconName.Plane]);
       expect(game.usedColors()).toEqual([ColorName.Teal]);
     });
   });

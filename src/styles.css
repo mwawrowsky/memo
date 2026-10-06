@@ -1,1 +1,31 @@
-@import './app/vendor/semantic.min.css';
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import 'material-symbols/outlined.css';
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font: var(--mat-sys-body-large);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+}
+
+h1 {
+  font: var(--mat-sys-headline-medium);
+  margin: 0 0 0.5em;
+}
+
+h2 {
+  font: var(--mat-sys-title-large);
+  margin: 1.5em 0 0.75em;
+}
+
+/* Filled icons read better on the colored game tiles. */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 1;
+}

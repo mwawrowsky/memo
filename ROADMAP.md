@@ -101,9 +101,13 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 
 ## Phase 7: Größere Umbauten
 
-- [ ] **7.1 Semantic UI ablösen** (L) ⚖️
-  - Semantic UI wird nicht mehr gepflegt und liegt als 470 kB großes minifiziertes CSS samt Fonts im Repo.
-  - Ziel laut README: Angular Material. Die Icons brauchen dann ein Ersatz-Set (z. B. Material Symbols).
+- [x] **7.1 Semantic UI ablösen** (L)
+  - Semantic UI (CSS, Icon-Fonts, Flaggen) ist entfernt; Angular Material 21 mit dem vorgefertigten Theme `azure-blue`, Roboto über `@fontsource/roboto`.
+  - Icons: Material Symbols (`material-symbols`, lokal ausgeliefert, gefüllt). Zuordnung: Truck → `local_shipping`, Beer → `sports_bar`, Bed → `bed`, Bell → `notifications`, Briefcase → `work`, Bicycle → `pedal_bike`, Binoculars → Camera (`photo_camera`), Bomb → `bomb`, Coffee → `coffee`, Fighter jet → Plane (`flight`).
+  - Material-Komponenten: Toolbar, Card (Startseite), Buttons, Icons, Ripple. Die Spielkacheln sind eigene Buttons mit den bisherigen zehn Farbtönen.
+  - Anzeigenamen kommen aus einer festen Zuordnung (`toLabel`), weil sie sich nicht mehr aus den Symbolnamen ableiten lassen.
+  - Offen: Die Icon-Schrift enthält alle über 4.000 Symbole (4 MB), genutzt werden 13.
+
 - [x] **7.2 Karma durch Vitest ersetzen** (M)
   - `ng test` läuft über `@angular/build:unit-test` mit Vitest in Node (jsdom), ohne Browser; Coverage über `@vitest/coverage-v8`.
   - Karma, Jasmine, `karma.conf.js`, `src/test.ts` und `@angular-devkit/build-angular` sind entfernt; alle Targets nutzen `@angular/build`.
@@ -114,6 +118,4 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 
 ## Offene Entscheidungen (⚖️)
 
-| Schritt | Frage |
-|---|---|
-| 7.1 | Angular Material einführen oder bei Semantic UI (bzw. Fomantic UI) bleiben? |
+Keine – alle Entscheidungen sind getroffen und bei den jeweiligen Schritten vermerkt.

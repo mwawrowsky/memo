@@ -1,14 +1,15 @@
+/** Game icons; the values are Material Symbols names. */
 export enum IconName {
-  Truck = 'truck',
-  Beer = 'beer',
+  Truck = 'local_shipping',
+  Beer = 'sports_bar',
   Bed = 'bed',
-  Bell = 'bell',
-  Briefcase = 'briefcase',
-  Bicycle = 'bicycle',
-  Binoculars = 'binoculars',
+  Bell = 'notifications',
+  Briefcase = 'work',
+  Bicycle = 'pedal_bike',
+  Camera = 'photo_camera',
   Bomb = 'bomb',
   Coffee = 'coffee',
-  FighterJet = 'fighter jet',
+  Plane = 'flight',
 }
 
 export enum ColorName {
@@ -43,7 +44,30 @@ export interface GuessStep {
   color?: ColorName;
 }
 
-/** Human-readable name of an icon or color, e.g. "Fighter jet" for 'fighter jet'. */
+const LABELS: Record<IconName | ColorName, string> = {
+  [IconName.Truck]: 'Truck',
+  [IconName.Beer]: 'Beer',
+  [IconName.Bed]: 'Bed',
+  [IconName.Bell]: 'Bell',
+  [IconName.Briefcase]: 'Briefcase',
+  [IconName.Bicycle]: 'Bicycle',
+  [IconName.Camera]: 'Camera',
+  [IconName.Bomb]: 'Bomb',
+  [IconName.Coffee]: 'Coffee',
+  [IconName.Plane]: 'Plane',
+  [ColorName.Red]: 'Red',
+  [ColorName.Yellow]: 'Yellow',
+  [ColorName.Green]: 'Green',
+  [ColorName.Blue]: 'Blue',
+  [ColorName.Purple]: 'Purple',
+  [ColorName.Brown]: 'Brown',
+  [ColorName.Grey]: 'Grey',
+  [ColorName.Black]: 'Black',
+  [ColorName.Pink]: 'Pink',
+  [ColorName.Teal]: 'Teal',
+};
+
+/** Human-readable name of an icon or color, e.g. "Truck" for 'local_shipping'. */
 export function toLabel(value: IconName | ColorName): string {
-  return value.charAt(0).toUpperCase() + value.slice(1);
+  return LABELS[value];
 }
