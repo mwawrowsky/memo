@@ -15,3 +15,35 @@
 .guess-progress .undo-guess {
   margin-left: auto;
 }
+
+/* Display-only items styled like buttons, e.g. the icon in the teaching phase. */
+.static {
+  cursor: default;
+  pointer-events: none;
+}
+
+.memo-item {
+  display: inline-block;
+  margin: 0;
+  text-align: center;
+}
+
+.color-name {
+  margin-top: 0.3em;
+  font-weight: bold;
+}
+
+.color-choice {
+  width: 100%;
+  min-height: 4.5em;
+}
+
+ol.solution {
+  list-style: none;
+  padding: 0;
+}
+
+/* Semantic UI uses white text on yellow, which is barely readable. */
+.ui.yellow.button.color-choice {
+  color: rgba(0, 0, 0, 0.87);
+}

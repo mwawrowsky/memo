@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
-import { GameState } from '../game/game.model';
+import { GameState, toLabel } from '../game/game.model';
 import { GameService } from '../game/game.service';
 import { reset } from '../store/result.actions';
 import { Result } from '../store/result.reducer';
@@ -18,6 +18,7 @@ export class TeachingPhaseComponent implements OnInit {
   readonly game = inject(GameService);
 
   protected readonly GameState = GameState;
+  protected readonly label = toLabel;
 
   private readonly router = inject(Router);
   private readonly store = inject<Store<{ result: Result }>>(Store);

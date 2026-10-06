@@ -42,3 +42,8 @@ export interface GuessStep {
   icon: IconName;
   color?: ColorName;
 }
+
+/** Human-readable name of an icon or color, e.g. "Fighter jet" for 'fighter jet'. */
+export function toLabel(value: IconName | ColorName): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
