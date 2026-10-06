@@ -91,10 +91,8 @@ describe('TeachingPhaseComponent', () => {
       expect(element().querySelector('[aria-live]')?.contains(item ?? null)).toBeTrue();
     });
 
-    it('should show the color name as text', () => {
-      expect(element().querySelector('.memo-item .color-name')?.textContent?.trim()).toBe(
-        toLabel(game.displayColor() ?? game.colorNames[0]),
-      );
+    it('should not show the color name as visible text', () => {
+      expect(element().querySelector('.memo-item')?.textContent?.trim()).toBe('');
     });
 
     it('should not render the displayed item as a button', () => {
@@ -128,11 +126,15 @@ describe('TeachingPhaseComponent', () => {
       gridButtons().forEach(button => expect(button.querySelector('i')?.getAttribute('aria-hidden')).toBe('true'));
     });
 
-    it('should show the color names on the color buttons', () => {
+    it('should name the color buttons for screen readers only', () => {
       [...game.usedIcons()].forEach(icon => game.guessIcon(icon));
       fixture.detectChanges();
 
-      expect(gridButtons().map(button => button.textContent?.trim())).toEqual(game.colorNames.map(toLabel));
+      expect(gridButtons().map(button => button.getAttribute('aria-label'))).toEqual(game.colorNames.map(toLabel));
+      gridButtons().forEach(button => {
+        expect(button.textContent?.trim()).toBe('');
+        expect(button.hasAttribute('title')).toBeFalse();
+      });
     });
 
     it('should tell which test is running', () => {
@@ -260,9 +262,7 @@ describe('TeachingPhaseComponent', () => {
         item.getAttribute('aria-label'),
       );
       expect(labels).toEqual(game.solution().map(step => `${toLabel(step.icon)} on ${toLabel(step.color)}`));
-      expect(Array.from(element().querySelectorAll('ol.solution .color-name')).map(c => c.textContent?.trim())).toEqual(
-        game.usedColors().map(toLabel),
-      );
+      expect(element().querySelector('ol.solution')?.textContent?.trim()).toBe('');
     });
 
     it('should only offer restart and reset as buttons', () => {

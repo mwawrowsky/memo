@@ -13,7 +13,6 @@
               >
                 <i class="icon {{ icon }}" aria-hidden="true"></i>
               </div>
-              <figcaption class="color-name" aria-hidden="true">{{ label(color) }}</figcaption>
             </figure>
           }
         }
@@ -37,7 +36,6 @@
           class="ui small icon button static guess-step {{ step.color ?? 'basic' }}"
           role="img"
           [attr.aria-label]="label(step.icon) + (step.color ? ' on ' + label(step.color) : '')"
-          [attr.title]="step.color ? label(step.color) : null"
         >
           <i class="{{ step.icon }} icon" aria-hidden="true"></i>
         </span>
@@ -71,10 +69,9 @@
             <button
               (click)="game.guessColor(color)"
               [disabled]="game.guessedColors().includes(color)"
-              class="ui large button color-choice {{ color }}"
-            >
-              {{ label(color) }}
-            </button>
+              [attr.aria-label]="label(color)"
+              class="ui massive icon button {{ color }}"
+            ></button>
           </div>
         }
       </div>
@@ -122,7 +119,6 @@
             >
               <i class="{{ step.icon }} icon" aria-hidden="true"></i>
             </div>
-            <figcaption class="color-name" aria-hidden="true">{{ label(step.color) }}</figcaption>
           </figure>
         </li>
       }
