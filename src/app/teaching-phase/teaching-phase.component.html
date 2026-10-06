@@ -75,8 +75,8 @@
     <div class="ui grid">
       @for (icon of usedIcons; track icon; let idx = $index) {
         <div class="three wide column">
-          <button class="ui massive {{ getTrainedColorName(idx) }} icon button">
-            <i class="{{ getTrainedIconName(idx) }} icon"></i>
+          <button class="ui massive {{ usedColors[idx] }} icon button">
+            <i class="{{ icon }} icon"></i>
           </button>
         </div>
       }
@@ -90,6 +90,9 @@
     </div>
     <div>
       <h2 style="padding-top: 1em;">Your hit/miss ratio is {{ hitCount$ | async }} : {{ missCount$ | async }}.</h2>
+      <button (click)="resetStatistics()" class="ui basic button reset-statistics">
+        Reset statistics
+      </button>
     </div>
   </div>
 }

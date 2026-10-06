@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { Observable } from 'rxjs';
 
-import { hit, miss } from '../store/result.actions';
+import { hit, miss, reset } from '../store/result.actions';
 import { Result } from '../store/result.reducer';
 
 const ROUND_COUNT = 3;
@@ -99,15 +99,11 @@ export class TeachingPhaseComponent implements OnInit, OnDestroy {
 
   restart(): void {
     this.stopTrainingTimer();
-    this.currentState = ComponentState.Teach;
-    this.roundsCount = 0;
-    this.availableIcons = [...this.iconNames];
-    this.availableColors = [...this.colorNames];
-    this.usedIcons = [];
-    this.usedColors = [];
-    this.guessedIcons = [];
-    this.guessedColors = [];
     void this.router.navigate(['home']);
+  }
+
+  resetStatistics(): void {
+    this.score.dispatch(reset());
   }
 
   teachNext(): void {
@@ -115,13 +111,13 @@ export class TeachingPhaseComponent implements OnInit, OnDestroy {
       this.displayIcon = this.getUnusedRandomIcon();
       this.displayColor = this.getUnusedRandomColor();
       this.roundsCount++;
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
       return;
     }
 
     this.stopTrainingTimer();
     this.currentState = ComponentState.TestIcons;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   getUnusedRandomIcon(): IconName {
@@ -171,14 +167,6 @@ export class TeachingPhaseComponent implements OnInit, OnDestroy {
 
   arrayEquals<T>(a: T[], b: T[]): boolean {
     return a.length === b.length && a.every((val, index) => val === b[index]);
-  }
-
-  getTrainedIconName(index: number): string {
-    return this.usedIcons[index];
-  }
-
-  getTrainedColorName(index: number): string {
-    return this.usedColors[index];
   }
 
   private stopTrainingTimer(): void {
