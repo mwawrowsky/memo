@@ -22,7 +22,7 @@ describe('TeachingPhaseComponent', () => {
 
   // Lets the teaching interval run until every round has been shown.
   const finishTeaching = (): void => {
-    jasmine.clock().tick(game.displayInterval * game.rounds);
+    vi.advanceTimersByTime(game.displayInterval * game.rounds);
   };
 
   // Plays a whole game through the service; `correct` decides the icon order.
@@ -36,7 +36,7 @@ describe('TeachingPhaseComponent', () => {
 
   beforeEach(async () => {
     // The game drives the teaching phase with setInterval.
-    jasmine.clock().install();
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
 
     await TestBed.configureTestingModule({
       imports: [TeachingPhaseComponent],
@@ -55,7 +55,7 @@ describe('TeachingPhaseComponent', () => {
   });
 
   afterEach(() => {
-    jasmine.clock().uninstall();
+    vi.useRealTimers();
   });
 
   it('should create', () => {
@@ -88,7 +88,7 @@ describe('TeachingPhaseComponent', () => {
 
       expect(item?.getAttribute('aria-label')).toBe(`${toLabel(icon)} on ${toLabel(color)}`);
       expect(item?.querySelector('i')?.getAttribute('aria-hidden')).toBe('true');
-      expect(element().querySelector('[aria-live]')?.contains(item ?? null)).toBeTrue();
+      expect(element().querySelector('[aria-live]')?.contains(item ?? null)).toBe(true);
     });
 
     it('should not show the color name as visible text', () => {
@@ -101,7 +101,7 @@ describe('TeachingPhaseComponent', () => {
 
     it('should render the next round when the timer fires', async () => {
       const firstIcon = game.displayIcon();
-      jasmine.clock().tick(game.displayInterval);
+      vi.advanceTimersByTime(game.displayInterval);
       await fixture.whenStable();
 
       const icon = element().querySelector('.memo-item i');
@@ -133,7 +133,7 @@ describe('TeachingPhaseComponent', () => {
       expect(gridButtons().map(button => button.getAttribute('aria-label'))).toEqual(game.colorNames.map(toLabel));
       gridButtons().forEach(button => {
         expect(button.textContent?.trim()).toBe('');
-        expect(button.hasAttribute('title')).toBeFalse();
+        expect(button.hasAttribute('title')).toBe(false);
       });
     });
 
@@ -183,8 +183,8 @@ describe('TeachingPhaseComponent', () => {
 
     it('should show the progress and disable undo before the first guess', () => {
       expect(progressText()).toBe(`0 of ${game.rounds} selected`);
-      expect(undoButton()?.disabled).toBeTrue();
-      expect(gridButtons().every(button => !button.disabled)).toBeTrue();
+      expect(undoButton()?.disabled).toBe(true);
+      expect(gridButtons().every(button => !button.disabled)).toBe(true);
     });
 
     it('should disable a guessed icon and show it in the progress', async () => {
@@ -192,11 +192,11 @@ describe('TeachingPhaseComponent', () => {
       iconButton(first)?.click();
       await fixture.whenStable();
 
-      expect(iconButton(first)?.disabled).toBeTrue();
+      expect(iconButton(first)?.disabled).toBe(true);
       expect(progressText()).toBe(`1 of ${game.rounds} selected`);
       expect(element().querySelectorAll('.guess-step').length).toBe(1);
       expect(element().querySelector('.guess-step')?.getAttribute('aria-label')).toBe(toLabel(first));
-      expect(undoButton()?.disabled).toBeFalse();
+      expect(undoButton()?.disabled).toBe(false);
     });
 
     it('should re-enable an icon after undo', async () => {
@@ -207,7 +207,7 @@ describe('TeachingPhaseComponent', () => {
       undoButton()?.click();
       await fixture.whenStable();
 
-      expect(iconButton(first)?.disabled).toBeFalse();
+      expect(iconButton(first)?.disabled).toBe(false);
       expect(progressText()).toBe(`0 of ${game.rounds} selected`);
       expect(element().querySelectorAll('.guess-step').length).toBe(0);
     });
@@ -222,7 +222,7 @@ describe('TeachingPhaseComponent', () => {
       colorButton()?.click();
       await fixture.whenStable();
 
-      expect(colorButton()?.disabled).toBeTrue();
+      expect(colorButton()?.disabled).toBe(true);
       expect(element().querySelectorAll('.guess-step').length).toBe(game.rounds);
       expect(element().querySelector('.guess-step')?.classList).toContain(firstColor);
       expect(element().querySelector('.guess-step')?.getAttribute('aria-label')).toBe(
@@ -283,13 +283,24 @@ describe('TeachingPhaseComponent', () => {
 
   describe('restart', () => {
     it('should stop the game and navigate home', () => {
-      const navigateSpy = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+      const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
       component.restart();
       finishTeaching();
 
-      expect(navigateSpy).toHaveBeenCalledOnceWith(['home']);
+      expect(navigateSpy).toHaveBeenCalledExactlyOnceWith(['home']);
       expect(game.roundsCount()).toBe(1);
+    });
+
+    it('should navigate home when "Restart" is clicked', () => {
+      const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+      playGame(true);
+
+      Array.from(element().querySelectorAll('button'))
+        .find(button => button.textContent?.trim() === 'Restart')
+        ?.click();
+
+      expect(navigateSpy).toHaveBeenCalledExactlyOnceWith(['home']);
     });
   });
 

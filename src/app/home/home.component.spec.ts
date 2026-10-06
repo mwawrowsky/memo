@@ -25,11 +25,11 @@ describe('HomeComponent', () => {
 
   it('should navigate to the teaching phase when "Begin" is clicked', () => {
     const router = TestBed.inject(Router);
-    const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
     const button = (fixture.nativeElement as HTMLElement).querySelector('button');
     button?.click();
 
-    expect(navigateSpy).toHaveBeenCalledOnceWith(['teach']);
+    expect(navigateSpy).toHaveBeenCalledExactlyOnceWith(['teach']);
   });
 });
