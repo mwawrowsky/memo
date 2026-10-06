@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 
 import { hit, miss } from '../store/result.actions';
 import { Result } from '../store/result.reducer';
-import { ColorName, GameState, IconName, SolutionStep } from './game.model';
+import { ColorName, GameState, GuessStep, IconName, SolutionStep } from './game.model';
 
 const ROUND_COUNT = 3;
 const DISPLAY_INTERVAL_MS = 3000;
@@ -43,6 +43,16 @@ export class GameService {
     this.usedIcons().map((icon, index) => ({ icon, color: this.usedColors()[index] })),
   );
 
+  /** Number of guesses made in the current test (icons or colors). */
+  readonly guessCount = computed(() =>
+    this.state() === GameState.TestColors ? this.guessedColors().length : this.guessedIcons().length,
+  );
+  /** The sequence guessed so far; colors are filled in during the color test. */
+  readonly guessPreview = computed<GuessStep[]>(() =>
+    this.guessedIcons().map((icon, index) => ({ icon, color: this.guessedColors()[index] })),
+  );
+  readonly canUndo = computed(() => this.isTesting() && this.guessedIcons().length > 0);
+
   private readonly store = inject<Store<{ result: Result }>>(Store);
   private interval?: ReturnType<typeof setInterval>;
 
@@ -67,6 +77,10 @@ export class GameService {
   }
 
   guessIcon(iconName: IconName): void {
+    if (this.state() !== GameState.TestIcons || this.guessedIcons().includes(iconName)) {
+      return;
+    }
+
     this.guessedIconsSignal.update(icons => [...icons, iconName]);
     if (this.guessedIcons().length === this.rounds) {
       this.stateSignal.set(GameState.TestColors);
@@ -74,6 +88,10 @@ export class GameService {
   }
 
   guessColor(colorName: ColorName): void {
+    if (this.state() !== GameState.TestColors || this.guessedColors().includes(colorName)) {
+      return;
+    }
+
     this.guessedColorsSignal.update(colors => [...colors, colorName]);
     if (this.guessedColors().length !== this.rounds) {
       return;
@@ -87,6 +105,28 @@ export class GameService {
 
     this.store.dispatch(miss());
     this.stateSignal.set(GameState.False);
+  }
+
+  /**
+   * Takes back the last guess. Without a color guess yet, the color test returns to
+   * the icon test and the last icon is taken back.
+   */
+  undoGuess(): void {
+    if (!this.canUndo()) {
+      return;
+    }
+
+    if (this.state() === GameState.TestColors && this.guessedColors().length > 0) {
+      this.guessedColorsSignal.update(colors => colors.slice(0, -1));
+      return;
+    }
+
+    this.stateSignal.set(GameState.TestIcons);
+    this.guessedIconsSignal.update(icons => icons.slice(0, -1));
+  }
+
+  private isTesting(): boolean {
+    return this.state() === GameState.TestIcons || this.state() === GameState.TestColors;
   }
 
   private teachNext(): void {
