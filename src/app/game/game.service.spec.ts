@@ -187,6 +187,169 @@ describe('GameService', () => {
     });
   });
 
+  describe('guess rules', () => {
+    beforeEach(() => {
+      game.start();
+      finishTeaching();
+    });
+
+    it('should ignore an icon that was already guessed', () => {
+      const [first, second] = game.usedIcons();
+      game.guessIcon(first);
+      game.guessIcon(first);
+      game.guessIcon(second);
+
+      expect(game.guessedIcons()).toEqual([first, second]);
+    });
+
+    it('should ignore a color that was already guessed', () => {
+      guessAllIcons();
+      const [first, second] = game.usedColors();
+      game.guessColor(first);
+      game.guessColor(first);
+      game.guessColor(second);
+
+      expect(game.guessedColors()).toEqual([first, second]);
+    });
+
+    it('should ignore color guesses during the icon test', () => {
+      game.guessColor(game.usedColors()[0]);
+
+      expect(game.guessedColors()).toEqual([]);
+    });
+
+    it('should ignore icon guesses during the color test', () => {
+      guessAllIcons();
+      game.guessIcon(game.availableIcons()[0]);
+
+      expect(game.guessedIcons()).toEqual(game.usedIcons());
+    });
+
+    it('should ignore guesses after the game ended', async () => {
+      guessAllIcons();
+      guessAllColors();
+      game.guessColor(game.availableColors()[0]);
+
+      expect(game.guessedColors()).toEqual(game.usedColors());
+      expect(await result()).toEqual({ hitCount: 1, missCount: 0 });
+    });
+  });
+
+  it('should ignore guesses during the teaching phase', () => {
+    game.start();
+    game.guessIcon(game.usedIcons()[0]);
+
+    expect(game.guessedIcons()).toEqual([]);
+  });
+
+  describe('progress', () => {
+    beforeEach(() => {
+      game.start();
+      finishTeaching();
+    });
+
+    it('should count icon guesses during the icon test', () => {
+      expect(game.guessCount()).toBe(0);
+      game.guessIcon(game.usedIcons()[0]);
+
+      expect(game.guessCount()).toBe(1);
+    });
+
+    it('should count color guesses during the color test', () => {
+      guessAllIcons();
+      expect(game.guessCount()).toBe(0);
+
+      game.guessColor(game.usedColors()[0]);
+
+      expect(game.guessCount()).toBe(1);
+    });
+
+    it('should preview the guessed icons and fill in the guessed colors', () => {
+      guessAllIcons();
+      game.guessColor(game.usedColors()[0]);
+
+      expect(game.guessPreview()).toEqual(
+        game.usedIcons().map((icon, index) => ({ icon, color: index === 0 ? game.usedColors()[0] : undefined })),
+      );
+    });
+  });
+
+  describe('undo', () => {
+    it('should not be possible during the teaching phase', () => {
+      game.start();
+
+      expect(game.canUndo()).toBeFalse();
+    });
+
+    describe('during the tests', () => {
+      beforeEach(() => {
+        game.start();
+        finishTeaching();
+      });
+
+      it('should not be possible before the first guess', () => {
+        expect(game.canUndo()).toBeFalse();
+
+        game.undoGuess();
+
+        expect(game.state()).toBe(GameState.TestIcons);
+      });
+
+      it('should take back the last icon', () => {
+        const [first, second] = game.usedIcons();
+        game.guessIcon(first);
+        game.guessIcon(second);
+        expect(game.canUndo()).toBeTrue();
+
+        game.undoGuess();
+
+        expect(game.guessedIcons()).toEqual([first]);
+        expect(game.state()).toBe(GameState.TestIcons);
+      });
+
+      it('should allow guessing an icon again after taking it back', () => {
+        const [first] = game.usedIcons();
+        game.guessIcon(first);
+        game.undoGuess();
+        game.guessIcon(first);
+
+        expect(game.guessedIcons()).toEqual([first]);
+      });
+
+      it('should take back the last color', () => {
+        guessAllIcons();
+        const [first, second] = game.usedColors();
+        game.guessColor(first);
+        game.guessColor(second);
+
+        game.undoGuess();
+
+        expect(game.guessedColors()).toEqual([first]);
+        expect(game.state()).toBe(GameState.TestColors);
+      });
+
+      it('should return to the icon test when no color was guessed yet', () => {
+        guessAllIcons();
+
+        game.undoGuess();
+
+        expect(game.state()).toBe(GameState.TestIcons);
+        expect(game.guessedIcons()).toEqual(game.usedIcons().slice(0, -1));
+      });
+
+      it('should not be possible after the game ended', () => {
+        guessAllIcons();
+        guessAllColors();
+        expect(game.canUndo()).toBeFalse();
+
+        game.undoGuess();
+
+        expect(game.state()).toBe(GameState.Correct);
+        expect(game.guessedColors()).toEqual(game.usedColors());
+      });
+    });
+  });
+
   describe('stopping', () => {
     it('should stop the teaching timer on stop()', () => {
       game.start();

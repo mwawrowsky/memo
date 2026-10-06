@@ -37,3 +37,8 @@ export interface SolutionStep {
   icon: IconName;
   color: ColorName;
 }
+
+export interface GuessStep {
+  icon: IconName;
+  color?: ColorName;
+}

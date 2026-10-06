@@ -1,0 +1,17 @@
+.guess-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 2.5em;
+  margin-bottom: 1em;
+}
+
+.guess-progress .guess-step {
+  cursor: default;
+  margin: 0;
+}
+
+.guess-progress .undo-guess {
+  margin-left: auto;
+}

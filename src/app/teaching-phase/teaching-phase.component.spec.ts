@@ -127,6 +127,63 @@ describe('TeachingPhaseComponent', () => {
     });
   });
 
+  describe('guess input', () => {
+    const iconButton = (icon: string): HTMLButtonElement | undefined =>
+      gridButtons().find(button => icon.split(' ').every(cls => button.querySelector('i')?.classList.contains(cls)));
+    const undoButton = (): HTMLButtonElement | null => element().querySelector<HTMLButtonElement>('button.undo-guess');
+    const progressText = (): string | undefined => element().querySelector('.guess-count')?.textContent?.trim();
+
+    beforeEach(async () => {
+      finishTeaching();
+      await fixture.whenStable();
+    });
+
+    it('should show the progress and disable undo before the first guess', () => {
+      expect(progressText()).toBe(`0 of ${game.rounds} selected`);
+      expect(undoButton()?.disabled).toBeTrue();
+      expect(gridButtons().every(button => !button.disabled)).toBeTrue();
+    });
+
+    it('should disable a guessed icon and show it in the progress', async () => {
+      const [first] = game.usedIcons();
+      iconButton(first)?.click();
+      await fixture.whenStable();
+
+      expect(iconButton(first)?.disabled).toBeTrue();
+      expect(progressText()).toBe(`1 of ${game.rounds} selected`);
+      expect(element().querySelectorAll('.guess-step').length).toBe(1);
+      expect(undoButton()?.disabled).toBeFalse();
+    });
+
+    it('should re-enable an icon after undo', async () => {
+      const [first] = game.usedIcons();
+      iconButton(first)?.click();
+      await fixture.whenStable();
+
+      undoButton()?.click();
+      await fixture.whenStable();
+
+      expect(iconButton(first)?.disabled).toBeFalse();
+      expect(progressText()).toBe(`0 of ${game.rounds} selected`);
+      expect(element().querySelectorAll('.guess-step').length).toBe(0);
+    });
+
+    it('should disable a guessed color and color the preview', async () => {
+      [...game.usedIcons()].forEach(icon => game.guessIcon(icon));
+      await fixture.whenStable();
+
+      const [firstColor] = game.usedColors();
+      const colorButton = (): HTMLButtonElement | undefined =>
+        gridButtons().find(button => button.classList.contains(firstColor));
+      colorButton()?.click();
+      await fixture.whenStable();
+
+      expect(colorButton()?.disabled).toBeTrue();
+      expect(element().querySelectorAll('.guess-step').length).toBe(game.rounds);
+      expect(element().querySelector('.guess-step')?.classList).toContain(firstColor);
+    });
+  });
+
   describe('result', () => {
     it('should congratulate after a correct game', () => {
       playGame(true);

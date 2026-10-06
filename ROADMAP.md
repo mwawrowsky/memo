@@ -88,9 +88,10 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 
 ## Phase 6: Bedienung und Barrierefreiheit
 
-- [ ] **6.1 Bessere Eingabe beim Raten** (M)
-  - Verhindern, dass dasselbe Icon oder dieselbe Farbe doppelt gewählt wird (Button nach der Auswahl deaktivieren).
-  - Fortschritt anzeigen („2 / 3 gewählt“) und die letzte Auswahl rückgängig machen können.
+- [x] **6.1 Bessere Eingabe beim Raten** (M)
+  - Gewählte Icons und Farben sind deaktiviert; der `GameService` ignoriert doppelte Auswahl sowie Eingaben außerhalb der passenden Testphase.
+  - Fortschritt („2 of 3 selected“) und die bisher gewählte Reihenfolge werden angezeigt; in der Farbphase bekommen die Icons ihre gewählte Farbe.
+  - „Undo“ nimmt die letzte Auswahl zurück. Ohne gewählte Farbe führt es von der Farb- zurück in die Icon-Phase.
 - [ ] **6.2 Barrierefreiheit** (S)
   - `aria-label` für alle Icon- und Farb-Buttons.
   - Farbnamen als Text oder Tooltip anzeigen, damit die Farbauswahl auch ohne Farbwahrnehmung funktioniert.

@@ -17,11 +17,27 @@
     <div class="three wide column" style="padding-bottom: 1em;">
       <p>Click in the order of appearance.</p>
     </div>
+    <div class="guess-progress">
+      <span class="guess-count">{{ game.guessCount() }} of {{ game.rounds }} selected</span>
+      @for (step of game.guessPreview(); track step.icon) {
+        <span class="ui small icon button guess-step {{ step.color ?? 'basic' }}">
+          <i class="{{ step.icon }} icon"></i>
+        </span>
+      }
+      <button (click)="game.undoGuess()" [disabled]="!game.canUndo()" class="ui basic button undo-guess">
+        <i class="undo icon"></i>
+        Undo
+      </button>
+    </div>
     @if (game.state() === GameState.TestIcons) {
       <div class="ui grid">
         @for (iconName of game.iconNames; track iconName) {
           <div class="three wide column">
-            <button (click)="game.guessIcon(iconName)" class="ui massive white icon button">
+            <button
+              (click)="game.guessIcon(iconName)"
+              [disabled]="game.guessedIcons().includes(iconName)"
+              class="ui massive white icon button"
+            >
               <i class="black {{ iconName }} icon"></i>
             </button>
           </div>
@@ -34,6 +50,7 @@
           <div class="three wide column">
             <button
               (click)="game.guessColor(color)"
+              [disabled]="game.guessedColors().includes(color)"
               class="ui massive icon button {{ color }}"
             ></button>
           </div>
