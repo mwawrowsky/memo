@@ -5,30 +5,37 @@ import { provideStore, Store } from '@ngrx/store';
 import { firstValueFrom } from 'rxjs';
 
 import { TeachingPhaseComponent } from './teaching-phase.component';
+import { GameService } from '../game/game.service';
+import { GameState } from '../game/game.model';
 import { reducer, Result } from '../store/result.reducer';
 
 describe('TeachingPhaseComponent', () => {
-  let component: TeachingPhaseComponent;
   let fixture: ComponentFixture<TeachingPhaseComponent>;
+  let component: TeachingPhaseComponent;
+  let game: GameService;
   let store: Store<{ result: Result }>;
 
   const element = (): HTMLElement => fixture.nativeElement as HTMLElement;
+  const heading = (): string | undefined => element().querySelector('h1')?.textContent ?? undefined;
+  const gridButtons = (): HTMLButtonElement[] =>
+    Array.from(element().querySelectorAll<HTMLButtonElement>('.ui.grid button'));
 
   // Lets the teaching interval run until every round has been shown.
   const finishTeaching = (): void => {
-    jasmine.clock().tick(component.displayInterval * component.rounds);
+    jasmine.clock().tick(game.displayInterval * game.rounds);
   };
 
-  const guessAllIcons = (icons = component.usedIcons()): void => {
-    [...icons].forEach(icon => component.guessIcon(icon));
-  };
-
-  const guessAllColors = (colors = component.usedColors()): void => {
-    [...colors].forEach(color => component.guessColor(color));
+  // Plays a whole game through the service; `correct` decides the icon order.
+  const playGame = (correct: boolean): void => {
+    finishTeaching();
+    const icons = correct ? game.usedIcons() : [...game.usedIcons()].reverse();
+    [...icons].forEach(icon => game.guessIcon(icon));
+    [...game.usedColors()].forEach(color => game.guessColor(color));
+    fixture.detectChanges();
   };
 
   beforeEach(async () => {
-    // The component drives the teaching phase with setInterval.
+    // The game drives the teaching phase with setInterval.
     jasmine.clock().install();
 
     await TestBed.configureTestingModule({
@@ -43,6 +50,7 @@ describe('TeachingPhaseComponent', () => {
     store = TestBed.inject(Store);
     fixture = TestBed.createComponent(TeachingPhaseComponent);
     component = fixture.componentInstance;
+    game = component.game;
     fixture.detectChanges();
   });
 
@@ -54,61 +62,33 @@ describe('TeachingPhaseComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should get its own game instance', () => {
+    expect(fixture.debugElement.injector.get(GameService)).toBe(game);
+  });
+
   describe('teaching phase', () => {
-    it('should start teaching immediately with the first round', () => {
-      expect(component.currentState() as string).toBe('teach');
-      expect(component.roundsCount()).toBe(1);
-      expect(component.usedIcons().length).toBe(1);
-      expect(component.usedColors().length).toBe(1);
+    it('should start the game on init', () => {
+      expect(game.state()).toBe(GameState.Teach);
+      expect(game.roundsCount()).toBe(1);
     });
 
     it('should render the current icon with its background color', () => {
       const button = element().querySelector('button');
       const icon = button?.querySelector('i');
 
-      expect(element().querySelector('h1')?.textContent).toContain('Teaching Phase');
-      expect(button?.classList).toContain(component.displayColor());
-      (component.displayIcon() ?? '').split(' ').forEach(cls => expect(icon?.classList).toContain(cls));
+      expect(heading()).toContain('Teaching Phase');
+      expect(button?.classList).toContain(game.displayColor() ?? '');
+      (game.displayIcon() ?? '').split(' ').forEach(cls => expect(icon?.classList).toContain(cls));
     });
 
     it('should render the next round when the timer fires', async () => {
-      const firstIcon = component.displayIcon();
-      jasmine.clock().tick(component.displayInterval);
+      const firstIcon = game.displayIcon();
+      jasmine.clock().tick(game.displayInterval);
       await fixture.whenStable();
 
       const icon = element().querySelector('button i');
-      expect(component.displayIcon()).not.toBe(firstIcon);
-      (component.displayIcon() ?? '').split(' ').forEach(cls => expect(icon?.classList).toContain(cls));
-    });
-
-    it('should show the next round after each display interval', () => {
-      jasmine.clock().tick(component.displayInterval);
-      expect(component.roundsCount()).toBe(2);
-      expect(component.currentState() as string).toBe('teach');
-    });
-
-    it('should switch to the icon test after all rounds were shown', () => {
-      finishTeaching();
-
-      expect(component.currentState() as string).toBe('testIcons');
-      expect(component.usedIcons().length).toBe(component.rounds);
-      expect(component.usedColors().length).toBe(component.rounds);
-    });
-
-    it('should never repeat an icon or a color within one game', () => {
-      finishTeaching();
-
-      expect(new Set(component.usedIcons()).size).toBe(component.rounds);
-      expect(new Set(component.usedColors()).size).toBe(component.rounds);
-    });
-
-    it('should remove used icons and colors from the available pool', () => {
-      finishTeaching();
-
-      component.usedIcons().forEach(icon => expect(component.availableIcons()).not.toContain(icon));
-      component.usedColors().forEach(color => expect(component.availableColors()).not.toContain(color));
-      expect(component.availableIcons().length).toBe(component.iconNames.length - component.rounds);
-      expect(component.availableColors().length).toBe(component.colorNames.length - component.rounds);
+      expect(game.displayIcon()).not.toBe(firstIcon);
+      (game.displayIcon() ?? '').split(' ').forEach(cls => expect(icon?.classList).toContain(cls));
     });
   });
 
@@ -119,117 +99,83 @@ describe('TeachingPhaseComponent', () => {
     });
 
     it('should offer every icon to choose from', () => {
-      expect(element().querySelectorAll('.ui.grid button').length).toBe(component.iconNames.length);
-    });
-
-    it('should switch to the color test after all icons were guessed', () => {
-      guessAllIcons();
-      fixture.detectChanges();
-
-      expect(component.currentState() as string).toBe('testColors');
-      expect(element().querySelectorAll('.ui.grid button').length).toBe(component.colorNames.length);
-    });
-
-    it('should stay in the icon test until all icons were guessed', () => {
-      component.guessIcon(component.usedIcons()[0]);
-      expect(component.currentState() as string).toBe('testIcons');
+      expect(heading()).toContain('Testing Phase');
+      expect(gridButtons().length).toBe(game.iconNames.length);
     });
 
     it('should record a guess when an icon button is clicked', () => {
-      const firstButton = element().querySelector<HTMLButtonElement>('.ui.grid button');
-      firstButton?.click();
+      gridButtons()[0].click();
 
-      expect(component.guessedIcons()).toEqual([component.iconNames[0]]);
+      expect(game.guessedIcons()).toEqual([game.iconNames[0]]);
     });
 
-    it('should report success and count a hit for the correct sequence', async () => {
-      guessAllIcons();
-      guessAllColors();
+    it('should offer every color after all icons were guessed', () => {
+      [...game.usedIcons()].forEach(icon => game.guessIcon(icon));
       fixture.detectChanges();
 
-      expect(component.currentState() as string).toBe('correct');
-      expect(element().querySelector('h1')?.textContent).toContain('Congratulations!');
-      expect(await firstValueFrom(store.select(state => state.result))).toEqual({
-        hitCount: 1,
-        missCount: 0,
-      });
+      expect(gridButtons().length).toBe(game.colorNames.length);
+      gridButtons().forEach((button, idx) => expect(button.classList).toContain(game.colorNames[idx]));
     });
 
-    it('should report failure and count a miss when the icon order is wrong', async () => {
-      guessAllIcons([...component.usedIcons()].reverse());
-      guessAllColors();
+    it('should record a guess when a color button is clicked', () => {
+      [...game.usedIcons()].forEach(icon => game.guessIcon(icon));
       fixture.detectChanges();
 
-      expect(component.currentState() as string).toBe('false');
-      expect(element().querySelector('h1')?.textContent).toContain('Sorry');
-      expect(await firstValueFrom(store.select(state => state.result))).toEqual({
-        hitCount: 0,
-        missCount: 1,
-      });
+      gridButtons()[0].click();
+
+      expect(game.guessedColors()).toEqual([game.colorNames[0]]);
+    });
+  });
+
+  describe('result', () => {
+    it('should congratulate after a correct game', () => {
+      playGame(true);
+
+      expect(heading()).toContain('Congratulations!');
     });
 
-    it('should report failure when the color order is wrong', () => {
-      guessAllIcons();
-      guessAllColors([...component.usedColors()].reverse());
+    it('should apologize after a wrong game', () => {
+      playGame(false);
 
-      expect(component.currentState() as string).toBe('false');
+      expect(heading()).toContain('Sorry');
     });
 
-    it('should show the solution after the game ended', () => {
-      guessAllIcons();
-      guessAllColors();
-      fixture.detectChanges();
+    it('should show the solution', () => {
+      playGame(true);
 
       const solutionButtons = Array.from(
         element().querySelectorAll<HTMLButtonElement>('.ui.grid .three.wide.column button'),
       );
-      expect(solutionButtons.length).toBe(component.rounds);
-      solutionButtons.forEach((button, idx) =>
-        expect(button.classList).toContain(component.usedColors()[idx]),
-      );
+      expect(solutionButtons.length).toBe(game.rounds);
+      solutionButtons.forEach((button, idx) => {
+        expect(button.classList).toContain(game.usedColors()[idx]);
+        game.usedIcons()[idx].split(' ').forEach(cls => expect(button.querySelector('i')?.classList).toContain(cls));
+      });
     });
 
-    it('should show the hit/miss ratio after the game ended', () => {
-      guessAllIcons();
-      guessAllColors();
-      fixture.detectChanges();
+    it('should show the hit/miss ratio', () => {
+      playGame(true);
 
       expect(element().textContent).toContain('Your hit/miss ratio is 1 : 0.');
     });
   });
 
   describe('restart', () => {
-    it('should navigate home', () => {
-      const router = TestBed.inject(Router);
-      const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
-      finishTeaching();
-      guessAllIcons();
-      guessAllColors();
+    it('should stop the game and navigate home', () => {
+      const navigateSpy = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
 
       component.restart();
+      finishTeaching();
 
       expect(navigateSpy).toHaveBeenCalledOnceWith(['home']);
-    });
-
-    it('should stop the teaching timer when restarting during the teaching phase', () => {
-      spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
-
-      component.restart();
-      jasmine.clock().tick(component.displayInterval * component.rounds);
-
-      expect(component.roundsCount()).toBe(1);
+      expect(game.roundsCount()).toBe(1);
     });
   });
 
   describe('reset statistics', () => {
     const result = (): Promise<Result> => firstValueFrom(store.select(state => state.result));
 
-    beforeEach(() => {
-      finishTeaching();
-      guessAllIcons();
-      guessAllColors();
-      fixture.detectChanges();
-    });
+    beforeEach(() => playGame(true));
 
     it('should reset the hit/miss counters in the store', async () => {
       expect(await result()).toEqual({ hitCount: 1, missCount: 0 });
@@ -248,50 +194,11 @@ describe('TeachingPhaseComponent', () => {
   });
 
   describe('destroy', () => {
-    it('should stop the teaching timer when the component is destroyed', () => {
+    it('should stop the game timer when the component is destroyed', () => {
       fixture.destroy();
 
-      expect(() => jasmine.clock().tick(component.displayInterval * component.rounds)).not.toThrow();
-      expect(component.roundsCount()).toBe(1);
-    });
-  });
-
-  describe('arrayEquals', () => {
-    it('should be true for arrays with the same elements in the same order', () => {
-      expect(component.arrayEquals([1, 2, 3], [1, 2, 3])).toBeTrue();
-    });
-
-    it('should be false for a different order', () => {
-      expect(component.arrayEquals([1, 2, 3], [3, 2, 1])).toBeFalse();
-    });
-
-    it('should be false for different lengths', () => {
-      expect(component.arrayEquals([1, 2], [1, 2, 3])).toBeFalse();
-    });
-  });
-
-  describe('teaching state', () => {
-    it('should derive the displayed icon and color from the latest round', () => {
-      jasmine.clock().tick(component.displayInterval);
-
-      expect(component.displayIcon()).toBe(component.usedIcons()[1]);
-      expect(component.displayColor()).toBe(component.usedColors()[1]);
-    });
-
-    it('should pair icons and colors in the solution', () => {
-      finishTeaching();
-
-      expect(component.solution()).toEqual(
-        component.usedIcons().map((icon, index) => ({ icon, color: component.usedColors()[index] })),
-      );
-    });
-  });
-
-  describe('getRandomIndex', () => {
-    it('should return an index within bounds', () => {
-      spyOn(Math, 'random').and.returnValues(0, 0.999);
-      expect(component.getRandomIndex(10)).toBe(0);
-      expect(component.getRandomIndex(10)).toBe(9);
+      expect(() => finishTeaching()).not.toThrow();
+      expect(game.roundsCount()).toBe(1);
     });
   });
 });
