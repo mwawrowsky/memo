@@ -92,9 +92,11 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
   - Gewählte Icons und Farben sind deaktiviert; der `GameService` ignoriert doppelte Auswahl sowie Eingaben außerhalb der passenden Testphase.
   - Fortschritt („2 of 3 selected“) und die bisher gewählte Reihenfolge werden angezeigt; in der Farbphase bekommen die Icons ihre gewählte Farbe.
   - „Undo“ nimmt die letzte Auswahl zurück. Ohne gewählte Farbe führt es von der Farb- zurück in die Icon-Phase.
-- [ ] **6.2 Barrierefreiheit** (S)
-  - `aria-label` für alle Icon- und Farb-Buttons.
-  - Farbnamen als Text oder Tooltip anzeigen, damit die Farbauswahl auch ohne Farbwahrnehmung funktioniert.
+- [x] **6.2 Barrierefreiheit** (S)
+  - Icon-Buttons haben `aria-label` und Tooltip, Farb-Buttons tragen den Farbnamen als Text (gelb mit dunkler Schrift für ausreichenden Kontrast).
+  - Farbnamen stehen auch sichtbar unter dem Icon in der Lernphase und in der Lösung, damit das Spiel ohne Farbwahrnehmung spielbar ist.
+  - Reine Anzeigen (Lernphase, Vorschau, Ergebnis-Symbol, Lösung) sind keine Buttons mehr, sondern `role="img"` mit Beschreibung („Bell on Red“); Icon-Glyphen sind `aria-hidden`, die Lösung ist eine geordnete Liste.
+  - Lernphase und Fortschritt werden über `aria-live` angesagt; der Hinweistext nennt die laufende Testphase (Icons oder Farben).
 
 ## Phase 7: Größere Umbauten
 

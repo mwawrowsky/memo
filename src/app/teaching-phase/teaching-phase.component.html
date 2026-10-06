@@ -2,10 +2,21 @@
   <div class="ui container">
     <h1>Teaching Phase</h1>
     <div class="ui grid">
-      <div class="column">
-        <button class="ui massive icon button {{ game.displayColor() }}">
-          <i class="icon {{ game.displayIcon() }}"></i>
-        </button>
+      <div class="column" aria-live="polite">
+        @if (game.displayIcon(); as icon) {
+          @if (game.displayColor(); as color) {
+            <figure class="memo-item">
+              <div
+                class="ui massive icon button static {{ color }}"
+                role="img"
+                [attr.aria-label]="label(icon) + ' on ' + label(color)"
+              >
+                <i class="icon {{ icon }}" aria-hidden="true"></i>
+              </div>
+              <figcaption class="color-name" aria-hidden="true">{{ label(color) }}</figcaption>
+            </figure>
+          }
+        }
       </div>
     </div>
   </div>
@@ -15,17 +26,24 @@
   <div class="ui container">
     <h1>Testing Phase</h1>
     <div class="three wide column" style="padding-bottom: 1em;">
-      <p>Click in the order of appearance.</p>
+      <p>
+        Click the {{ game.state() === GameState.TestIcons ? 'icons' : 'colors' }} in the order of appearance.
+      </p>
     </div>
     <div class="guess-progress">
-      <span class="guess-count">{{ game.guessCount() }} of {{ game.rounds }} selected</span>
+      <span class="guess-count" aria-live="polite">{{ game.guessCount() }} of {{ game.rounds }} selected</span>
       @for (step of game.guessPreview(); track step.icon) {
-        <span class="ui small icon button guess-step {{ step.color ?? 'basic' }}">
-          <i class="{{ step.icon }} icon"></i>
+        <span
+          class="ui small icon button static guess-step {{ step.color ?? 'basic' }}"
+          role="img"
+          [attr.aria-label]="label(step.icon) + (step.color ? ' on ' + label(step.color) : '')"
+          [attr.title]="step.color ? label(step.color) : null"
+        >
+          <i class="{{ step.icon }} icon" aria-hidden="true"></i>
         </span>
       }
       <button (click)="game.undoGuess()" [disabled]="!game.canUndo()" class="ui basic button undo-guess">
-        <i class="undo icon"></i>
+        <i class="undo icon" aria-hidden="true"></i>
         Undo
       </button>
     </div>
@@ -36,9 +54,11 @@
             <button
               (click)="game.guessIcon(iconName)"
               [disabled]="game.guessedIcons().includes(iconName)"
+              [attr.aria-label]="label(iconName)"
+              [attr.title]="label(iconName)"
               class="ui massive white icon button"
             >
-              <i class="black {{ iconName }} icon"></i>
+              <i class="black {{ iconName }} icon" aria-hidden="true"></i>
             </button>
           </div>
         }
@@ -51,8 +71,10 @@
             <button
               (click)="game.guessColor(color)"
               [disabled]="game.guessedColors().includes(color)"
-              class="ui massive icon button {{ color }}"
-            ></button>
+              class="ui large button color-choice {{ color }}"
+            >
+              {{ label(color) }}
+            </button>
           </div>
         }
       </div>
@@ -65,9 +87,9 @@
     <h1>Congratulations!</h1>
     <div class="ui grid">
       <div class="column">
-        <button class="ui massive green icon button">
+        <div class="ui massive green icon button static" aria-hidden="true">
           <i class="thumbs up icon"></i>
-        </button>
+        </div>
       </div>
     </div>
   </div>
@@ -78,9 +100,9 @@
     <h1>Sorry</h1>
     <div class="ui grid">
       <div class="column">
-        <button class="ui massive red icon button">
+        <div class="ui massive red icon button static" aria-hidden="true">
           <i class="frown icon"></i>
-        </button>
+        </div>
       </div>
     </div>
   </div>
@@ -89,15 +111,22 @@
 @if (game.state() === GameState.Correct || game.state() === GameState.False) {
   <div class="ui container">
     <h2 style="padding-top: 1em;">The solution was</h2>
-    <div class="ui grid">
+    <ol class="ui grid solution">
       @for (step of game.solution(); track step.icon) {
-        <div class="three wide column">
-          <button class="ui massive {{ step.color }} icon button">
-            <i class="{{ step.icon }} icon"></i>
-          </button>
-        </div>
+        <li class="three wide column">
+          <figure class="memo-item">
+            <div
+              class="ui massive {{ step.color }} icon button static"
+              role="img"
+              [attr.aria-label]="label(step.icon) + ' on ' + label(step.color)"
+            >
+              <i class="{{ step.icon }} icon" aria-hidden="true"></i>
+            </div>
+            <figcaption class="color-name" aria-hidden="true">{{ label(step.color) }}</figcaption>
+          </figure>
+        </li>
       }
-    </div>
+    </ol>
     <div class="ui grid">
       <div class="column">
         <button (click)="restart()" class="ui white button">
