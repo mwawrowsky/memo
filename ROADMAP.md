@@ -19,9 +19,9 @@ Legende: **S** = klein (< 30 min), **M** = mittel, **L** = groß · ⚖️ = vor
 - [x] **0.2 Patch-Updates und `npm audit fix`** (S)
   - Angular 21.2.4 → 21.2.25, NgRx 21.0.1 → 21.1.1, typescript-eslint 8.71, ESLint 9.39.5; die Mindestversionen in der `package.json` sind angehoben.
   - Behoben: alle Schwachstellen in Produktionsabhängigkeiten (u. a. XSS in `@angular/compiler`, DoS in `@angular/common`); `npm audit --omit=dev` meldet 0.
-  - Offen: 13 Funde in Dev-Tooling (`braces`/`chokidar` über Karma und `webpack-dev-server`, `uuid` über `sockjs`). Dafür gibt es keinen nicht-brechenden Fix; sie entfallen mit 7.2.
+  - Offen: 13 Funde in Dev-Tooling (`braces`/`chokidar` über Karma und `webpack-dev-server`, `uuid` über `sockjs`). Dafür gab es keinen nicht-brechenden Fix; sie sind mit 7.2 entfallen (`npm audit`: 0).
 - [x] **0.3 CI-Workflow (GitHub Actions)** (S)
-  - `npm ci`, `ng lint`, `ng build`, `ng test --watch=false --browsers=ChromeHeadless` bei jedem PR.
+  - `npm ci`, `ng lint`, `ng test --watch=false`, `ng build` bei jedem PR (seit 7.2 mit Vitest statt ChromeHeadless).
   - Warum: Jeder folgende Schritt wird automatisch geprüft.
 
 - [x] **0.4 `ng serve` reparieren** (S), erledigt in #93
@@ -38,6 +38,7 @@ Legende: **S** = klein (< 30 min), **M** = mittel, **L** = groß · ⚖️ = vor
   - `@angular/animations` und `@angular/forms` wurden entfernt. `@angular/forms` kommt wieder dazu, sobald Reactive Forms (README-Ziel) umgesetzt werden.
 - [x] **1.3 Coverage-Reporter ersetzen** (S)
   - `karma-coverage-istanbul-reporter` (veraltet, nicht einmal unter `reporters` eingetragen) durch `karma-coverage` ersetzen und in `karma.conf.js` aktivieren.
+  - Seit 7.2 übernimmt Vitest (`@vitest/coverage-v8`) die Coverage: `ng test --watch=false --coverage`.
   - Aufruf: `ng test --code-coverage`, Bericht unter `coverage/memo/` (HTML, lcov, Zusammenfassung). Stand: 100 % Statements, Branches, Functions und Lines.
 - [x] **1.4 Veraltete Kommentare und Konfiguration bereinigen** (S)
   - Kommentare zu Zone.js und `--prod` in `src/environments/environment.ts` sowie den Kommentar in `src/test.ts`.
@@ -71,7 +72,7 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 ## Phase 4: Build
 
 - [x] **4.1 Auf den `application`-Builder (esbuild) migrieren** (M), erledigt in #90
-  - Offen: `@angular-devkit/build-angular` durch `@angular/build` ersetzen, sobald Karma nicht mehr gebraucht wird (siehe 7.2).
+  - `@angular-devkit/build-angular` ist mit 7.2 durch `@angular/build` ersetzt.
 - [x] **4.2 Produktions-Build als Standard** (S), erledigt in #90
   - Dabei ist der Dev-Server kaputtgegangen, siehe 0.4.
 
@@ -103,10 +104,11 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 - [ ] **7.1 Semantic UI ablösen** (L) ⚖️
   - Semantic UI wird nicht mehr gepflegt und liegt als 470 kB großes minifiziertes CSS samt Fonts im Repo.
   - Ziel laut README: Angular Material. Die Icons brauchen dann ein Ersatz-Set (z. B. Material Symbols).
-- [ ] **7.2 Karma durch Vitest ersetzen** (M) ⚖️
-  - Karma ist veraltet, Angular 21 bringt Vitest-Unterstützung mit (`@angular/build:unit-test`).
-  - Setzt 4.1 voraus. Danach kann `@angular-devkit/build-angular` ganz entfallen.
-  - Beseitigt dabei die restlichen Audit-Funde aus 0.2 (Karma und `webpack-dev-server` sind dann nicht mehr im Abhängigkeitsbaum).
+- [x] **7.2 Karma durch Vitest ersetzen** (M)
+  - `ng test` läuft über `@angular/build:unit-test` mit Vitest in Node (jsdom), ohne Browser; Coverage über `@vitest/coverage-v8`.
+  - Karma, Jasmine, `karma.conf.js`, `src/test.ts` und `@angular-devkit/build-angular` sind entfernt; alle Targets nutzen `@angular/build`.
+  - Specs: `jasmine.clock` → `vi.useFakeTimers` (nur `setInterval`/`clearInterval`, damit der zoneless Scheduler weiterläuft), `spyOn` → `vi.spyOn` usw.
+  - Die restlichen Audit-Funde aus 0.2 sind damit weg (`npm audit`: 0).
 
 ---
 
@@ -115,4 +117,3 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 | Schritt | Frage |
 |---|---|
 | 7.1 | Angular Material einführen oder bei Semantic UI (bzw. Fomantic UI) bleiben? |
-| 7.2 | Auf Vitest umsteigen oder bei Karma bleiben? |

@@ -14,7 +14,7 @@ describe('GameService', () => {
 
   // Lets the teaching interval run until every round has been shown.
   const finishTeaching = (): void => {
-    jasmine.clock().tick(game.displayInterval * game.rounds);
+    vi.advanceTimersByTime(game.displayInterval * game.rounds);
   };
 
   const guessAllIcons = (icons = game.usedIcons()): void => {
@@ -28,7 +28,7 @@ describe('GameService', () => {
   const result = (): Promise<Result> => firstValueFrom(store.select(state => state.result));
 
   beforeEach(() => {
-    jasmine.clock().install();
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
 
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection(), provideStore({ result: reducer })],
@@ -41,7 +41,7 @@ describe('GameService', () => {
   });
 
   afterEach(() => {
-    jasmine.clock().uninstall();
+    vi.useRealTimers();
     injector.destroy();
   });
 
@@ -62,14 +62,14 @@ describe('GameService', () => {
     });
 
     it('should show the next round after each display interval', () => {
-      jasmine.clock().tick(game.displayInterval);
+      vi.advanceTimersByTime(game.displayInterval);
 
       expect(game.roundsCount()).toBe(2);
       expect(game.state()).toBe(GameState.Teach);
     });
 
     it('should derive the displayed icon and color from the latest round', () => {
-      jasmine.clock().tick(game.displayInterval);
+      vi.advanceTimersByTime(game.displayInterval);
 
       expect(game.displayIcon()).toBe(game.usedIcons()[1]);
       expect(game.displayColor()).toBe(game.usedColors()[1]);
@@ -85,7 +85,7 @@ describe('GameService', () => {
 
     it('should stop adding rounds after the teaching phase', () => {
       finishTeaching();
-      jasmine.clock().tick(game.displayInterval * 5);
+      vi.advanceTimersByTime(game.displayInterval * 5);
 
       expect(game.roundsCount()).toBe(game.rounds);
     });
@@ -117,7 +117,7 @@ describe('GameService', () => {
 
   describe('random selection', () => {
     it('should pick from the remaining icons and colors', () => {
-      spyOn(Math, 'random').and.returnValue(0);
+      vi.spyOn(Math, 'random').mockReturnValue(0);
 
       game.start();
       finishTeaching();
@@ -127,7 +127,7 @@ describe('GameService', () => {
     });
 
     it('should be able to pick the last element of the pool', () => {
-      spyOn(Math, 'random').and.returnValue(0.999);
+      vi.spyOn(Math, 'random').mockReturnValue(0.999);
 
       game.start();
 
@@ -278,7 +278,7 @@ describe('GameService', () => {
     it('should not be possible during the teaching phase', () => {
       game.start();
 
-      expect(game.canUndo()).toBeFalse();
+      expect(game.canUndo()).toBe(false);
     });
 
     describe('during the tests', () => {
@@ -288,7 +288,7 @@ describe('GameService', () => {
       });
 
       it('should not be possible before the first guess', () => {
-        expect(game.canUndo()).toBeFalse();
+        expect(game.canUndo()).toBe(false);
 
         game.undoGuess();
 
@@ -299,7 +299,7 @@ describe('GameService', () => {
         const [first, second] = game.usedIcons();
         game.guessIcon(first);
         game.guessIcon(second);
-        expect(game.canUndo()).toBeTrue();
+        expect(game.canUndo()).toBe(true);
 
         game.undoGuess();
 
@@ -340,7 +340,7 @@ describe('GameService', () => {
       it('should not be possible after the game ended', () => {
         guessAllIcons();
         guessAllColors();
-        expect(game.canUndo()).toBeFalse();
+        expect(game.canUndo()).toBe(false);
 
         game.undoGuess();
 
