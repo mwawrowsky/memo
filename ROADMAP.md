@@ -77,10 +77,10 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 
 ## Phase 5: Modernisierung des Codes
 
-- [ ] **5.1 Teaching-Phase auf Signals umstellen** (M)
-  - Spielzustand als `signal`/`computed`, Store-Werte über `store.selectSignal()` statt `AsyncPipe`.
-  - Ersetzt `ChangeDetectorRef` und alle manuellen `detectChanges()`-Aufrufe.
-  - Den Test-Helper `render()` brauchen die Specs danach nicht mehr.
+- [x] **5.1 Teaching-Phase auf Signals umstellen** (M)
+  - Spielzustand als `signal`, abgeleitete Werte (`roundsCount`, `displayIcon`/`displayColor`, verfügbare Icons und Farben, `solution`) als `computed`.
+  - Store-Werte über `store.selectSignal()` statt `AsyncPipe`; `ChangeDetectorRef` und `markForCheck()` sind entfernt, der Timer wird über `DestroyRef` gestoppt.
+  - Der Test-Helper `render()` ist entfernt.
 - [ ] **5.2 Spiellogik in einen Service auslagern** (M, optional)
   - Zufallsauswahl, Rundenverwaltung und Auswertung landen in einem `GameService`, die Komponente kümmert sich nur noch um die Anzeige.
   - Erleichtert Tests und passt zum README-Ziel „DI“.
