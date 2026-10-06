@@ -106,7 +106,7 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
   - Icons: Material Symbols (`material-symbols`, lokal ausgeliefert, gefüllt). Zuordnung: Truck → `local_shipping`, Beer → `sports_bar`, Bed → `bed`, Bell → `notifications`, Briefcase → `work`, Bicycle → `pedal_bike`, Binoculars → Camera (`photo_camera`), Bomb → `bomb`, Coffee → `coffee`, Fighter jet → Plane (`flight`).
   - Material-Komponenten: Toolbar, Card (Startseite), Buttons, Icons, Ripple. Die Spielkacheln sind eigene Buttons mit den bisherigen zehn Farbtönen.
   - Anzeigenamen kommen aus einer festen Zuordnung (`toLabel`), weil sie sich nicht mehr aus den Symbolnamen ableiten lassen.
-  - Offen: Die Icon-Schrift enthält alle über 4.000 Symbole (4 MB), genutzt werden 13.
+  - Entscheidung: Die Icon-Schrift enthält alle über 4.000 Symbole (4 MB), genutzt werden 13. Sie bleibt bewusst vollständig (wenig Pflegeaufwand; einmal geladen, danach aus dem Cache). Alternativen wären eine Teilmenge von Google Fonts (`icon_names`) oder eine lokal erzeugte Teilmenge.
 
 - [x] **7.2 Karma durch Vitest ersetzen** (M)
   - `ng test` läuft über `@angular/build:unit-test` mit Vitest in Node (jsdom), ohne Browser; Coverage über `@vitest/coverage-v8`.
