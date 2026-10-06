@@ -81,9 +81,10 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
   - Spielzustand als `signal`, abgeleitete Werte (`roundsCount`, `displayIcon`/`displayColor`, verfügbare Icons und Farben, `solution`) als `computed`.
   - Store-Werte über `store.selectSignal()` statt `AsyncPipe`; `ChangeDetectorRef` und `markForCheck()` sind entfernt, der Timer wird über `DestroyRef` gestoppt.
   - Der Test-Helper `render()` ist entfernt.
-- [ ] **5.2 Spiellogik in einen Service auslagern** (M, optional)
-  - Zufallsauswahl, Rundenverwaltung und Auswertung landen in einem `GameService`, die Komponente kümmert sich nur noch um die Anzeige.
-  - Erleichtert Tests und passt zum README-Ziel „DI“.
+- [x] **5.2 Spiellogik in einen Service auslagern** (M, optional)
+  - `src/app/game/`: `GameService` (Rundenverwaltung, Timer, Zufallsauswahl, Auswertung, Meldung an den Store) und `game.model.ts` (Icons, Farben, Spielzustand).
+  - Der Service wird pro Komponente bereitgestellt (`providers: [GameService]`): jedes Spiel startet mit frischem Zustand, der Timer endet mit der Komponente. Nach außen gibt er nur lesbare Signals heraus.
+  - Die Komponente kümmert sich nur noch um Anzeige, Navigation und Statistik; die Spiellogik hat eine eigene Spec.
 
 ## Phase 6: Bedienung und Barrierefreiheit
 
