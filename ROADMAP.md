@@ -16,14 +16,15 @@ Legende: **S** = klein (< 30 min), **M** = mittel, **L** = groß · ⚖️ = vor
   - Eintrag `/package-lock.json` aus `.gitignore` entfernen, Lockfile committen.
   - Warum: Builds sind ohne Lockfile nicht reproduzierbar.
   - Fertig, wenn: `npm ci` auf einem frischen Checkout funktioniert.
-- [ ] **0.2 Patch-Updates und `npm audit fix`** (S)
-  - Angular 21.2.4 → 21.2.x (neueste), NgRx 21.0 → 21.1, typescript-eslint Patch-Updates.
-  - Fertig, wenn: `npm audit` keine hohen Schwachstellen mehr meldet und Build, Lint und Tests grün sind.
+- [x] **0.2 Patch-Updates und `npm audit fix`** (S)
+  - Angular 21.2.4 → 21.2.25, NgRx 21.0.1 → 21.1.1, typescript-eslint 8.71, ESLint 9.39.5; die Mindestversionen in der `package.json` sind angehoben.
+  - Behoben: alle Schwachstellen in Produktionsabhängigkeiten (u. a. XSS in `@angular/compiler`, DoS in `@angular/common`); `npm audit --omit=dev` meldet 0.
+  - Offen: 13 Funde in Dev-Tooling (`braces`/`chokidar` über Karma und `webpack-dev-server`, `uuid` über `sockjs`). Dafür gibt es keinen nicht-brechenden Fix; sie entfallen mit 7.2.
 - [ ] **0.3 CI-Workflow (GitHub Actions)** (S) ⚖️
   - `npm ci`, `ng lint`, `ng build`, `ng test --watch=false --browsers=ChromeHeadless` bei jedem PR.
   - Warum: Jeder folgende Schritt wird automatisch geprüft.
 
-- [ ] **0.4 `ng serve` reparieren** (S) 🔥 dringend
+- [x] **0.4 `ng serve` reparieren** (S), erledigt in #93
   - Seit #90 bricht `npm start` mit „Configuration 'development' for target 'serve' … is not set“ ab: `serve` verweist auf `memo:build:development`, unter `build.configurations` gibt es aber nur `production`.
   - Lösung: Eine Konfiguration `development` unter `build` ergänzen (`optimization: false`, `sourceMap: true`, `extractLicenses: false`) und sie unter `serve.configurations` eintragen.
   - Fertig, wenn: `npm start` die App unter `localhost:4200` ausliefert.
@@ -100,6 +101,7 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 - [ ] **7.2 Karma durch Vitest ersetzen** (M) ⚖️
   - Karma ist veraltet, Angular 21 bringt Vitest-Unterstützung mit (`@angular/build:unit-test`).
   - Setzt 4.1 voraus. Danach kann `@angular-devkit/build-angular` ganz entfallen.
+  - Beseitigt dabei die restlichen Audit-Funde aus 0.2 (Karma und `webpack-dev-server` sind dann nicht mehr im Abhängigkeitsbaum).
 
 ---
 
