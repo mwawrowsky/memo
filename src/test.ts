@@ -1,4 +1,4 @@
-// This file is required by karma.conf.js and loads recursively all the .spec and framework files
+// Test entry point: initializes the Angular testing environment for all specs.
 
 import { getTestBed } from '@angular/core/testing';
 import {

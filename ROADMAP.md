@@ -31,18 +31,19 @@ Legende: **S** = klein (< 30 min), **M** = mittel, **L** = groß · ⚖️ = vor
 
 ## Phase 1: Aufräumen von Altlasten
 
-- [ ] **1.1 Protractor-Reste entfernen** (S)
+- [x] **1.1 Protractor-Reste entfernen** (S)
   - Ordner `e2e/` löschen, devDependencies `jasmine-spec-reporter` und `ts-node` entfernen.
   - Warum: Protractor wurde in `714a801` entfernt, die Dateien sind liegen geblieben.
 - [x] **1.2 Ungenutzte Abhängigkeiten entfernen** (S), erledigt in #90
   - `@angular/animations` und `@angular/forms` wurden entfernt. `@angular/forms` kommt wieder dazu, sobald Reactive Forms (README-Ziel) umgesetzt werden.
-- [ ] **1.3 Coverage-Reporter ersetzen** (S)
+- [x] **1.3 Coverage-Reporter ersetzen** (S)
   - `karma-coverage-istanbul-reporter` (veraltet, nicht einmal unter `reporters` eingetragen) durch `karma-coverage` ersetzen und in `karma.conf.js` aktivieren.
-  - Entfällt, falls 7.2 (Vitest) vorgezogen wird.
-- [ ] **1.4 Veraltete Kommentare und Konfiguration bereinigen** (S)
+  - Aufruf: `ng test --code-coverage`, Bericht unter `coverage/memo/` (HTML, lcov, Zusammenfassung). Stand: 100 % Statements, Branches, Functions und Lines.
+- [x] **1.4 Veraltete Kommentare und Konfiguration bereinigen** (S)
   - Kommentare zu Zone.js und `--prod` in `src/environments/environment.ts` sowie den Kommentar in `src/test.ts`.
   - `.browserslistrc` löschen, damit Angulars Standard-Browserliste gilt (beseitigt die Build-Warnungen).
   - Tippfehler „threreafter“ im README korrigieren.
+  - `fullTemplateTypeCheck` aus `tsconfig.json` entfernen (überflüssig neben `strictTemplates`).
 
 ## Phase 2: Fehler in der Spiellogik
 
