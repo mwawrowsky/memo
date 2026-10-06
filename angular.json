@@ -56,6 +56,11 @@
                   "maximumError": "10kb"
                 }
               ]
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
             }
           },
           "defaultConfiguration": "production"
@@ -68,6 +73,9 @@
           "configurations": {
             "production": {
               "buildTarget": "memo:build:production"
+            },
+            "development": {
+              "buildTarget": "memo:build:development"
             }
           },
           "defaultConfiguration": "development"
