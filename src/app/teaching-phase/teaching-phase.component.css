@@ -1,34 +1,122 @@
+/* Game colors: the same shades as the former Semantic UI palette. */
+.swatch {
+  --swatch: var(--mat-sys-surface-container-high);
+  --swatch-content: var(--mat-sys-on-surface);
+  background: var(--swatch);
+  color: var(--swatch-content);
+}
+
+.swatch.red { --swatch: #db2828; --swatch-content: #fff; }
+.swatch.yellow { --swatch: #fbbd08; --swatch-content: #fff; }
+.swatch.green { --swatch: #21ba45; --swatch-content: #fff; }
+.swatch.blue { --swatch: #2185d0; --swatch-content: #fff; }
+.swatch.purple { --swatch: #a333c8; --swatch-content: #fff; }
+.swatch.brown { --swatch: #a5673f; --swatch-content: #fff; }
+.swatch.grey { --swatch: #767676; --swatch-content: #fff; }
+.swatch.black { --swatch: #1b1c1d; --swatch-content: #fff; }
+.swatch.pink { --swatch: #e03997; --swatch-content: #fff; }
+.swatch.teal { --swatch: #00b5ad; --swatch-content: #fff; }
+
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 72px;
+  height: 72px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+}
+
+.tile mat-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 40px;
+}
+
+.tile-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+}
+
+.tile-large mat-icon {
+  width: 72px;
+  height: 72px;
+  font-size: 72px;
+}
+
+.tile-small {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.tile-small mat-icon {
+  width: 22px;
+  height: 22px;
+  font-size: 22px;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 72px);
+  gap: 16px;
+}
+
+.choice {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 100ms ease-out;
+}
+
+.choice:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.choice:focus-visible {
+  outline: 3px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+.choice:disabled {
+  cursor: default;
+  opacity: 0.3;
+}
+
 .guess-progress {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5em;
-  min-height: 2.5em;
-  margin-bottom: 1em;
-}
-
-.guess-progress .guess-step {
-  cursor: default;
-  margin: 0;
+  gap: 8px;
+  min-height: 40px;
+  margin-bottom: 16px;
 }
 
 .guess-progress .undo-guess {
   margin-left: auto;
 }
 
-/* Display-only items styled like buttons, e.g. the icon in the teaching phase. */
-.static {
-  cursor: default;
-  pointer-events: none;
+.result-icon {
+  width: 64px;
+  height: 64px;
+  font-size: 64px;
 }
 
-.memo-item {
-  display: inline-block;
-  margin: 0;
-  text-align: center;
+.result-icon.correct {
+  color: #21ba45;
+}
+
+.result-icon.false {
+  color: var(--mat-sys-error);
 }
 
 ol.solution {
+  display: flex;
+  gap: 16px;
   list-style: none;
   padding: 0;
+  margin: 0 0 24px;
 }

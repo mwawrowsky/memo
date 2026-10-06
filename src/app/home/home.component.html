@@ -1,12 +1,14 @@
-<div class="ui container">
-  <h1>Memo Game</h1>
-  <p>Memorize the order of the displayed icons and their background colors.</p>
-
-  <div class="ui grid">
-    <div class="column">
-      <button (click)="startTraining()" class="ui button">
-        Begin
-      </button>
-    </div>
-  </div>
-</div>
+<mat-card appearance="outlined" class="intro">
+  <mat-card-header>
+    <h1 mat-card-title>Memo Game</h1>
+  </mat-card-header>
+  <mat-card-content>
+    <p>Memorize the order of the displayed icons and their background colors.</p>
+  </mat-card-content>
+  <mat-card-actions>
+    <button matButton="filled" (click)="startTraining()">
+      <mat-icon aria-hidden="true">play_arrow</mat-icon>
+      Begin
+    </button>
+  </mat-card-actions>
+</mat-card>

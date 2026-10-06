@@ -1,4 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { MatButton } from '@angular/material/button';
+import { MatRipple } from '@angular/material/core';
+import { MatIcon } from '@angular/material/icon';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
 
@@ -12,6 +15,7 @@ import { Result } from '../store/result.reducer';
   templateUrl: './teaching-phase.component.html',
   styleUrls: ['./teaching-phase.component.css'],
   standalone: true,
+  imports: [MatButton, MatIcon, MatRipple],
   providers: [GameService],
 })
 export class TeachingPhaseComponent implements OnInit {

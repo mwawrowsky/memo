@@ -1,140 +1,93 @@
 @if (game.state() === GameState.Teach) {
-  <div class="ui container">
+  <section>
     <h1>Teaching Phase</h1>
-    <div class="ui grid">
-      <div class="column" aria-live="polite">
-        @if (game.displayIcon(); as icon) {
-          @if (game.displayColor(); as color) {
-            <figure class="memo-item">
-              <div
-                class="ui massive icon button static {{ color }}"
-                role="img"
-                [attr.aria-label]="label(icon) + ' on ' + label(color)"
-              >
-                <i class="icon {{ icon }}" aria-hidden="true"></i>
-              </div>
-            </figure>
-          }
+    <div class="stage" aria-live="polite">
+      @if (game.displayIcon(); as icon) {
+        @if (game.displayColor(); as color) {
+          <div class="tile tile-large swatch {{ color }}" role="img" [attr.aria-label]="label(icon) + ' on ' + label(color)">
+            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+          </div>
         }
-      </div>
+      }
     </div>
-  </div>
+  </section>
 }
 
 @if (game.state() === GameState.TestIcons || game.state() === GameState.TestColors) {
-  <div class="ui container">
+  <section>
     <h1>Testing Phase</h1>
-    <div class="three wide column" style="padding-bottom: 1em;">
-      <p>
-        Click the {{ game.state() === GameState.TestIcons ? 'icons' : 'colors' }} in the order of appearance.
-      </p>
-    </div>
+    <p>Click the {{ game.state() === GameState.TestIcons ? 'icons' : 'colors' }} in the order of appearance.</p>
     <div class="guess-progress">
       <span class="guess-count" aria-live="polite">{{ game.guessCount() }} of {{ game.rounds }} selected</span>
       @for (step of game.guessPreview(); track step.icon) {
         <span
-          class="ui small icon button static guess-step {{ step.color ?? 'basic' }}"
+          class="tile tile-small guess-step swatch {{ step.color ?? 'none' }}"
           role="img"
           [attr.aria-label]="label(step.icon) + (step.color ? ' on ' + label(step.color) : '')"
         >
-          <i class="{{ step.icon }} icon" aria-hidden="true"></i>
+          <mat-icon aria-hidden="true">{{ step.icon }}</mat-icon>
         </span>
       }
-      <button (click)="game.undoGuess()" [disabled]="!game.canUndo()" class="ui basic button undo-guess">
-        <i class="undo icon" aria-hidden="true"></i>
+      <button matButton="outlined" (click)="game.undoGuess()" [disabled]="!game.canUndo()" class="undo-guess">
+        <mat-icon aria-hidden="true">undo</mat-icon>
         Undo
       </button>
     </div>
     @if (game.state() === GameState.TestIcons) {
-      <div class="ui grid">
+      <div class="choices">
         @for (iconName of game.iconNames; track iconName) {
-          <div class="three wide column">
-            <button
-              (click)="game.guessIcon(iconName)"
-              [disabled]="game.guessedIcons().includes(iconName)"
-              [attr.aria-label]="label(iconName)"
-              [attr.title]="label(iconName)"
-              class="ui massive white icon button"
-            >
-              <i class="black {{ iconName }} icon" aria-hidden="true"></i>
-            </button>
-          </div>
+          <button
+            class="tile choice swatch none"
+            matRipple
+            (click)="game.guessIcon(iconName)"
+            [disabled]="game.guessedIcons().includes(iconName)"
+            [attr.aria-label]="label(iconName)"
+            [attr.title]="label(iconName)"
+          >
+            <mat-icon aria-hidden="true">{{ iconName }}</mat-icon>
+          </button>
         }
       </div>
     }
     @if (game.state() === GameState.TestColors) {
-      <div class="ui grid">
+      <div class="choices">
         @for (color of game.colorNames; track color) {
-          <div class="three wide column">
-            <button
-              (click)="game.guessColor(color)"
-              [disabled]="game.guessedColors().includes(color)"
-              [attr.aria-label]="label(color)"
-              class="ui massive icon button {{ color }}"
-            ></button>
-          </div>
+          <button
+            class="tile choice swatch {{ color }}"
+            matRipple
+            (click)="game.guessColor(color)"
+            [disabled]="game.guessedColors().includes(color)"
+            [attr.aria-label]="label(color)"
+          ></button>
         }
       </div>
     }
-  </div>
-}
-
-@if (game.state() === GameState.Correct) {
-  <div class="ui container">
-    <h1>Congratulations!</h1>
-    <div class="ui grid">
-      <div class="column">
-        <div class="ui massive green icon button static" aria-hidden="true">
-          <i class="thumbs up icon"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-}
-
-@if (game.state() === GameState.False) {
-  <div class="ui container">
-    <h1>Sorry</h1>
-    <div class="ui grid">
-      <div class="column">
-        <div class="ui massive red icon button static" aria-hidden="true">
-          <i class="frown icon"></i>
-        </div>
-      </div>
-    </div>
-  </div>
+  </section>
 }
 
 @if (game.state() === GameState.Correct || game.state() === GameState.False) {
-  <div class="ui container">
-    <h2 style="padding-top: 1em;">The solution was</h2>
-    <ol class="ui grid solution">
+  <section>
+    @if (game.state() === GameState.Correct) {
+      <h1>Congratulations!</h1>
+      <mat-icon class="result-icon correct" aria-hidden="true">thumb_up</mat-icon>
+    } @else {
+      <h1>Sorry</h1>
+      <mat-icon class="result-icon false" aria-hidden="true">sentiment_dissatisfied</mat-icon>
+    }
+
+    <h2>The solution was</h2>
+    <ol class="solution">
       @for (step of game.solution(); track step.icon) {
-        <li class="three wide column">
-          <figure class="memo-item">
-            <div
-              class="ui massive {{ step.color }} icon button static"
-              role="img"
-              [attr.aria-label]="label(step.icon) + ' on ' + label(step.color)"
-            >
-              <i class="{{ step.icon }} icon" aria-hidden="true"></i>
-            </div>
-          </figure>
+        <li>
+          <div class="tile swatch {{ step.color }}" role="img" [attr.aria-label]="label(step.icon) + ' on ' + label(step.color)">
+            <mat-icon aria-hidden="true">{{ step.icon }}</mat-icon>
+          </div>
         </li>
       }
     </ol>
-    <div class="ui grid">
-      <div class="column">
-        <button (click)="restart()" class="ui white button">
-          Restart
-        </button>
-      </div>
-    </div>
-    <div>
-      <h2 style="padding-top: 1em;">Your hit/miss ratio is {{ hitCount() }} : {{ missCount() }}.</h2>
-      <button (click)="resetStatistics()" class="ui basic button reset-statistics">
-        Reset statistics
-      </button>
-    </div>
-  </div>
+    <button matButton="filled" (click)="restart()">Restart</button>
+
+    <h2>Your hit/miss ratio is {{ hitCount() }} : {{ missCount() }}.</h2>
+    <button matButton="outlined" (click)="resetStatistics()" class="reset-statistics">Reset statistics</button>
+  </section>
 }

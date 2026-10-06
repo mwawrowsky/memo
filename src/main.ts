@@ -3,6 +3,7 @@ import { provideRouter, Routes } from '@angular/router';
 import { provideStore } from '@ngrx/store';
 import { provideStoreDevtools } from '@ngrx/store-devtools';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { MAT_ICON_DEFAULT_OPTIONS } from '@angular/material/icon';
 
 import { environment } from './environments/environment';
 import { AppComponent } from './app/app.component';
@@ -22,5 +23,6 @@ bootstrapApplication(AppComponent, {
     provideStore({ result: reducer }),
     provideStoreDevtools({ maxAge: 10, logOnly: environment.production }),
     provideRouter(routes),
+    { provide: MAT_ICON_DEFAULT_OPTIONS, useValue: { fontSet: 'material-symbols-outlined' } },
   ],
 }).catch(err => console.error(err));
