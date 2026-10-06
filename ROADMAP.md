@@ -19,7 +19,7 @@ Legende: **S** = klein (< 30 min), **M** = mittel, **L** = groß · ⚖️ = vor
 - [ ] **0.2 Patch-Updates und `npm audit fix`** (S)
   - Angular 21.2.4 → 21.2.x (neueste), NgRx 21.0 → 21.1, typescript-eslint Patch-Updates.
   - Fertig, wenn: `npm audit` keine hohen Schwachstellen mehr meldet und Build, Lint und Tests grün sind.
-- [ ] **0.3 CI-Workflow (GitHub Actions)** (S) ⚖️
+- [x] **0.3 CI-Workflow (GitHub Actions)** (S)
   - `npm ci`, `ng lint`, `ng build`, `ng test --watch=false --browsers=ChromeHeadless` bei jedem PR.
   - Warum: Jeder folgende Schritt wird automatisch geprüft.
 
@@ -107,7 +107,6 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
 
 | Schritt | Frage |
 |---|---|
-| 0.3 | CI mit GitHub Actions einrichten? |
 | 2.3 | Action `reset` entfernen oder als „Statistik zurücksetzen“ nutzen? |
 | 7.1 | Angular Material einführen oder bei Semantic UI (bzw. Fomantic UI) bleiben? |
 | 7.2 | Auf Vitest umsteigen oder bei Karma bleiben? |
