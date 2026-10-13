@@ -8,13 +8,13 @@ Memo is a small memory training app. The player should memorize a series of icon
 
 ## Angular features
 The following features are planned to be used at the end:
-* components
-* routing
+* Components
+* Routing
 * Angular Material
-* reactive forms with
-  * validation
-  * pipes
-* redux
-* service for http requests
+* Reactive forms with
+  * Validation
+  * Pipes
+* Redux
+* Service for HTTP requests
 * DI
-* unit tests
+* Unit tests
