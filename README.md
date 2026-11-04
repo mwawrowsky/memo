@@ -29,7 +29,7 @@ One-time setup:
 
 1. Create a key pair just for deployments, without a passphrase: `ssh-keygen -t ed25519 -N "" -C "github-deploy-memo" -f memo_deploy`.
 2. Add the content of `memo_deploy.pub` as a new line to `~/.ssh/authorized_keys` on the webhosting.
-3. Get the host key: `ssh-keyscan -p 222 <host>`.
+3. Get the host key: `ssh-keyscan -p 222 <host>`. On Windows, use Git Bash: the `ssh-keyscan` that ships with Windows fails with `unsupported KEX method sntrup761x25519-sha512@openssh.com`.
 4. Add these repository secrets under *Settings → Secrets and variables → Actions*:
 
 | Secret | Value |
