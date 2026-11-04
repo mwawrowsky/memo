@@ -114,6 +114,14 @@ Alle betreffen `src/app/teaching-phase/teaching-phase.component.ts`.
   - Specs: `jasmine.clock` → `vi.useFakeTimers` (nur `setInterval`/`clearInterval`, damit der zoneless Scheduler weiterläuft), `spyOn` → `vi.spyOn` usw.
   - Die restlichen Audit-Funde aus 0.2 sind damit weg (`npm audit`: 0).
 
+- [x] **7.3 Upgrade auf Angular 22** (M)
+  - Angular, CDK/Material und NgRx 22, TypeScript 6.0, angular-eslint 22 (per `ng update`).
+  - ESLint nutzt die Flat Config (`eslint.config.js`) über die Pakete `angular-eslint` und `typescript-eslint`; `.eslintrc.json` und die einzelnen `@angular-eslint/*`- und `@typescript-eslint/*`-Pakete sind entfernt.
+  - `tsconfig.json`: `baseUrl` und `downlevelIteration` entfernt (in TypeScript 6 veraltet, ungenutzt).
+  - Change Detection: `OnPush` ist in Angular 22 Standard. Die Migration hatte `ChangeDetectionStrategy.Eager` eingetragen; das ist wieder entfernt, weil der Zustand vollständig über Signals läuft.
+  - Die Migration hat in `tsconfig.app.json`/`tsconfig.spec.json` die Diagnosen `nullishCoalescingNotNullable` und `optionalChainNotNullable` abgeschaltet, um das Verhalten vor v22 beizubehalten.
+  - `npm audit --omit=dev`: 0. Offen sind moderate `minimatch`-Funde im ESLint-Tooling, für die es noch keinen nicht-brechenden Fix gibt.
+
 ---
 
 ## Offene Entscheidungen (⚖️)
