@@ -1,0 +1,99 @@
+name: Deploy
+
+# Builds the app and uploads it to the Hetzner webhosting via rsync over SSH.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST         SSH host of the webhosting, e.g. wwwNNN.your-server.de
+#   DEPLOY_USER         SSH user
+#   DEPLOY_SSH_KEY      private key (OpenSSH format) whose public key is in
+#                       ~/.ssh/authorized_keys on the webhosting
+#   DEPLOY_KNOWN_HOSTS  output of `ssh-keyscan -p <port> <host>`
+#   DEPLOY_PATH         document root of the (sub)domain, e.g. public_html/memo
+#                       (relative to the SSH home or absolute). Everything in it
+#                       that is not part of the build is deleted.
+# Optional:
+#   DEPLOY_PORT         SSH port, defaults to 222 (Hetzner webhosting)
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never run two deployments at once, and do not cancel one that is uploading.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Unit tests
+        run: npx ng test --watch=false
+
+      - name: Build
+        run: npx ng build
+
+      - name: Check deploy settings
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+        run: |
+          missing=0
+          for name in DEPLOY_HOST DEPLOY_USER DEPLOY_SSH_KEY DEPLOY_KNOWN_HOSTS DEPLOY_PATH; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is not set."
+              missing=1
+            fi
+          done
+          # rsync --delete wipes the target, so refuse obviously wrong targets.
+          case "${DEPLOY_PATH%/}" in
+            ""|"/"|"."|"~"|".."|"/home"|"/usr"|"/var") echo "::error::DEPLOY_PATH '$DEPLOY_PATH' is not allowed."; missing=1 ;;
+          esac
+          test -f dist/memo/browser/index.html || { echo "::error::Build output missing."; missing=1; }
+          exit $missing
+
+      - name: Set up SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Upload
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '222' }}
+        run: |
+          rsync -rlz --checksum --delete --delay-updates \
+            --exclude='.well-known/' \
+            -e "ssh -p $DEPLOY_PORT -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes" \
+            dist/memo/browser/ "$DEPLOY_USER@$DEPLOY_HOST:${DEPLOY_PATH%/}/"
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
